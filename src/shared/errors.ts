@@ -109,6 +109,9 @@ export class CancelledError extends RouterOSError {
   }
 }
 
+/** Raised when a reconnect displaces pending work, rejects new work while a
+ *  replacement is in progress, or refuses a concurrent reconnect. Code
+ *  `'RECONNECT'`. */
 export class ReconnectError extends RouterOSError {
   declare readonly code: 'RECONNECT';
 

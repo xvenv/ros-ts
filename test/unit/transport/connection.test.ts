@@ -46,17 +46,6 @@ async function connect(router: FakeRouter): Promise<NativeConnection> {
   return promise;
 }
 
-async function waitForConnectionCount(
-  router: FakeRouter,
-  count: number,
-): Promise<void> {
-  for (let attempt = 0; attempt < 100; attempt += 1) {
-    if (router.connectionCount === count) return;
-    await new Promise<void>((resolve) => setTimeout(resolve, 1));
-  }
-  assert.equal(router.connectionCount, count);
-}
-
 test('connects, logs in, and runs a tagged command', async () => {
   const router = await FakeRouter.start();
   const connectionPromise = NativeConnection.connect(options(router.port));
@@ -315,7 +304,7 @@ test('aborting during login rejects with ClosedError', async () => {
   controller.abort();
 
   await assert.rejects(connecting, ClosedError);
-  await waitForConnectionCount(router, 0);
+  await router.waitForConnectionCount(0);
 
   await router.close();
 });

@@ -37,7 +37,8 @@ export interface CommandResult<R = RosRecord, Done = RosRecord> {
   readonly done: Done;
 }
 
-/** Lifecycle state of one native API connection. */
+/** Lifecycle state of the client's current connection generation.
+ *  `reconnecting` is reported by the client while it replaces the generation. */
 export type ClientState =
   | 'idle'
   | 'connecting'

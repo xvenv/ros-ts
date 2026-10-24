@@ -6,6 +6,7 @@ import {
   type ConnectOptions,
   type DoneFor,
   type EmptySchema,
+  failedIterable,
   ProtocolError,
   ReconnectError,
   type RowFor,
@@ -53,6 +54,9 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: CommandOptions<RowFor<S, P>>,
   ): Promise<CommandResult<RowFor<S, P>, DoneFor<P>>> {
+    if (this.closedByUser) {
+      return Promise.reject(new ClosedError());
+    }
     if (this.reconnectInProgress !== undefined) {
       return Promise.reject(new ReconnectError('Reconnecting'));
     }
@@ -85,6 +89,9 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: StreamCommandOptions<RowFor<S, P>>,
   ): AsyncIterable<RowFor<S, P>> {
+    if (this.closedByUser) {
+      return failedIterable<RowFor<S, P>>(new ClosedError());
+    }
     if (this.reconnectInProgress !== undefined) {
       return failedIterable<RowFor<S, P>>(new ReconnectError('Reconnecting'));
     }
@@ -104,6 +111,11 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     }) as AsyncIterable<RowFor<S, P>>;
   }
 
+  /** Replaces the underlying connection on this client. Requires the full
+   *  connection options; the old connection is closed first, and pending
+   *  commands and streams reject with {@link ReconnectError}. A failed
+   *  replacement leaves the client closed but retryable; after `close()`,
+   *  reconnect rejects with {@link ClosedError}. */
   async reconnect(options: ConnectOptions): Promise<void> {
     if (this.closedByUser) throw new ClosedError();
     if (this.reconnectInProgress !== undefined) {
@@ -143,7 +155,11 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
       this.connection = next;
       this.terminalFailure = undefined;
     } catch (error) {
-      const failure = error instanceof Error ? error : new Error(String(error));
+      const failure = this.closedByUser
+        ? new ClosedError()
+        : error instanceof Error
+          ? error
+          : new Error(String(error));
       this.terminalFailure = failure;
       throw failure;
     }
@@ -157,6 +173,7 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
       await this.connection.close();
     } finally {
       if (reconnect !== undefined) await reconnect.catch(() => undefined);
+      this.terminalFailure = undefined;
     }
   }
 
@@ -242,14 +259,6 @@ function normalizeConnectOptions(options: ConnectOptions): NativeConnectionOptio
     maxWordBytes: options.maxWordBytes ?? 32 * 1024 * 1024,
     streamHighWaterMark: options.streamHighWaterMark ?? 1024,
     cancelGraceMs: options.cancelGraceMs ?? 2_000,
-  };
-}
-
-function failedIterable<T>(error: Error): AsyncIterable<T> {
-  return {
-    [Symbol.asyncIterator]: (): AsyncIterator<T> => ({
-      next: () => Promise.reject(error),
-    }),
   };
 }
 

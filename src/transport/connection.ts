@@ -12,6 +12,7 @@ import {
   ClosedError,
   type CommandResult,
   ConnectionError,
+  failedIterable,
   FatalError,
   LoginError,
   ProtocolError,
@@ -136,7 +137,7 @@ export class NativeConnection {
     options: { signal?: AbortSignal; highWaterMark?: number } = {},
   ): AsyncIterable<RosRecord> {
     if (this.stateValue !== 'ready') {
-      return this.failedIterable(this.unavailableError());
+      return failedIterable<RosRecord>(this.unavailableError());
     }
     return this.mux.stream(words, options);
   }
@@ -373,13 +374,5 @@ export class NativeConnection {
       return new ConnectionError('Connection closed');
     }
     return new ConnectionError('Client is not ready');
-  }
-
-  private failedIterable(error: Error): AsyncIterable<RosRecord> {
-    return {
-      [Symbol.asyncIterator]: (): AsyncIterator<RosRecord> => ({
-        next: () => Promise.reject(error),
-      }),
-    };
   }
 }

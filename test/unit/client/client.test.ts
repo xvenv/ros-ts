@@ -830,6 +830,58 @@ test('close during reconnect cancels the new attempt', async () => {
   const close = client.close();
   await assert.rejects(reconnect, ClosedError);
   await close;
+  await router.waitForConnectionCount(0);
   assert.equal(client.state, 'closed');
+  await assert.rejects(client.command('/system/identity/print'), ClosedError);
+});
+
+test('a new stream works after reconnect', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+  onTestFinished(async () => {
+    await client.close().catch(() => undefined);
+  });
+
+  const reconnect = client.reconnect(options(router));
+  await router.nextCommand();
+  router.send(['!done']);
+  await reconnect;
+
+  const iterator = client.stream('/interface/listen')[Symbol.asyncIterator]();
+  const first = iterator.next();
+  const command = await router.nextCommand();
+  assert.ok(command.tag);
+  router.send(['!re', '=name=ether1', `.tag=${command.tag}`]);
+  const record = await first;
+  assert.equal(record.done, false);
+
+  const stopped = iterator.return?.();
+  const cancel = await router.nextCommand();
+  assert.deepEqual(cancel.words, ['/cancel', `=tag=${command.tag}`]);
+  router.send(['!done', `.tag=${command.tag}`]);
+  await stopped;
+});
+
+test('close after a failed reconnect rejects commands with ClosedError', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+
+  const failed = client.reconnect({
+    ...options(router),
+    password: 'wrong',
+  });
+  const badLogin = await router.nextCommand();
+  assert.deepEqual(badLogin.words, ['/login', '=name=admin', '=password=wrong']);
+  router.send(['!trap', '=message=invalid user name or password']);
+  await assert.rejects(failed, LoginError);
+  await assert.rejects(client.command('/system/identity/print'), LoginError);
+
+  await client.close();
   await assert.rejects(client.command('/system/identity/print'), ClosedError);
 });

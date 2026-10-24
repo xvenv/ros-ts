@@ -42,6 +42,16 @@ export class FakeRouter {
     return this.sockets.size;
   }
 
+  async waitForConnectionCount(count: number): Promise<void> {
+    for (let attempt = 0; attempt < 100; attempt += 1) {
+      if (this.sockets.size === count) return;
+      await new Promise<void>((resolve) => setTimeout(resolve, 1));
+    }
+    if (this.sockets.size !== count) {
+      throw new Error(`Expected ${count} connections, got ${this.sockets.size}`);
+    }
+  }
+
   async nextCommand(): Promise<FakeCommand> {
     const command = this.commands.shift();
     if (command !== undefined) return command;
