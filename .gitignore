@@ -10,3 +10,7 @@ coverage
 !.vscode/
 !.vscode/settings.json
 !.vscode/extensions.json
+
+# Local agent instructions and design notes; not published.
+AGENTS.md
+docs/
