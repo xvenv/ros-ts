@@ -10,8 +10,6 @@ Type-safe client for the MikroTik RouterOS **native API** over TCP 8728 or TLS 8
 
 ## Install
 
-Not yet published. Once published:
-
 ```bash
 npm install @xvenv/ros-ts
 ```
