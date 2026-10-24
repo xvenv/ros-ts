@@ -13,6 +13,10 @@ alias or deprecate. Each entry below is a break in the type-level contract that
   can name the default the client now carries instead of spelling the shape out.
   The entry is pinned by name in `test/types/public-api.ts`: removing it from
   `src/index.ts` fails the type-check gate rather than passing review.
+- `RouterOS.reconnect(options)` replaces the connection on an existing client.
+  It requires full connection options, rejects pending commands and streams
+  with `ReconnectError`, adds the `reconnecting` state, and keeps `closed`
+  generation-scoped. Streams are not resubscribed; the caller re-issues them.
 
 ### Changed
 

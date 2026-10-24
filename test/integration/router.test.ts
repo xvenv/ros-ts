@@ -3,8 +3,13 @@ import { randomUUID } from 'node:crypto';
 
 import { afterAll, beforeAll, describe, it } from 'vite-plus/test';
 
-import { RouterOS } from '../../src/index.js';
-import { CancelledError, TimeoutError, TrapError } from '../../src/shared/index.js';
+import { RouterOS, type ConnectOptions } from '../../src/index.js';
+import {
+  CancelledError,
+  LoginError,
+  TimeoutError,
+  TrapError,
+} from '../../src/shared/index.js';
 
 const hostValue = process.env.ROS_HOST;
 const userValue = process.env.ROS_USER;
@@ -21,19 +26,23 @@ function required(value: string | undefined, name: string): string {
   return value;
 }
 
+function connectionOptions(): ConnectOptions {
+  return {
+    host: required(hostValue, 'ROS_HOST'),
+    ...(port === undefined ? {} : { port }),
+    user: required(userValue, 'ROS_USER'),
+    password,
+    tls: useTls ? (insecureTls ? { rejectUnauthorized: false } : true) : false,
+    connectTimeoutMs: 10_000,
+    timeoutMs: 10_000,
+  };
+}
+
 describe.skipIf(skip)('RouterOS integration', () => {
   let client: RouterOS;
 
   beforeAll(async () => {
-    client = await RouterOS.connect({
-      host: required(hostValue, 'ROS_HOST'),
-      ...(port === undefined ? {} : { port }),
-      user: required(userValue, 'ROS_USER'),
-      password,
-      tls: useTls ? (insecureTls ? { rejectUnauthorized: false } : true) : false,
-      connectTimeoutMs: 10_000,
-      timeoutMs: 10_000,
-    });
+    client = await RouterOS.connect(connectionOptions());
   });
 
   afterAll(async () => {
@@ -105,6 +114,50 @@ describe.skipIf(skip)('RouterOS integration', () => {
       clearTimeout(timer);
     }
   });
+
+  it('reconnects on the same client and keeps working', async () => {
+    const local = await RouterOS.connect(connectionOptions());
+    try {
+      const before = await local.command('/system/identity/print', {
+        proplist: ['name'],
+      });
+      assert.ok(before.records.length >= 1);
+
+      await local.reconnect(connectionOptions());
+
+      const after = await local.command('/system/identity/print', {
+        proplist: ['name'],
+      });
+      assert.ok(after.records.length >= 1);
+    } finally {
+      await local.close();
+    }
+  });
+
+  it(
+    'retries a failed reconnect with corrected credentials',
+    { timeout: 20_000 },
+    async () => {
+      const local = await RouterOS.connect(connectionOptions());
+      try {
+        await assert.rejects(
+          local.reconnect({
+            ...connectionOptions(),
+            password: 'definitely-wrong',
+          }),
+          LoginError,
+        );
+        await local.reconnect(connectionOptions());
+
+        const identity = await local.command('/system/identity/print', {
+          proplist: ['name'],
+        });
+        assert.ok(identity.records.length >= 1);
+      } finally {
+        await local.close();
+      }
+    },
+  );
 
   it.skipIf(!writeEnabled)(
     'creates, updates, and removes a queue with UTF-8 comment',

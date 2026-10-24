@@ -58,8 +58,17 @@ too and is idempotent. `connect<S>()` takes the schema you declare; with no
 type argument it defaults to `EmptySchema`, which types no command at all.
 
 `client.state` is the connection's lifecycle state (`ClientState`: `idle`,
-`connecting`, `logging-in`, `ready`, `closing`, `closed`), and `client.closed`
-is a promise that resolves once the socket is fully closed, for any reason.
+`connecting`, `logging-in`, `ready`, `reconnecting`, `closing`, `closed`), and
+`client.closed` is a promise that resolves once the socket of the current
+generation is fully closed, for any reason.
+
+`client.reconnect(options)` replaces the connection on the same client. It
+requires the full options, closes the old connection first, and rejects pending
+commands and streams with `ReconnectError`. Streams are not resubscribed;
+re-issue them after the reconnect. `state` is `reconnecting` while the
+replacement runs. `closed` stays generation-scoped: after a successful
+reconnect the getter refers to the new connection, while a promise captured
+earlier resolves with the old one.
 
 TLS verifies certificates by default. Pass `tls: { ca }` for a private CA;
 turning verification off requires the explicit
@@ -249,7 +258,8 @@ RouterOSError
 ├─ TrapError         code 'TRAP'        (category, trapMessage, done)
 ├─ FatalError        code 'FATAL'       (reason)
 ├─ TimeoutError      code 'TIMEOUT'     (phase: connect | command)
-└─ CancelledError    code 'CANCELLED'   (reason)
+├─ CancelledError    code 'CANCELLED'   (reason)
+└─ ReconnectError    code 'RECONNECT'   (pending work displaced by reconnect)
 ```
 
 ```ts
