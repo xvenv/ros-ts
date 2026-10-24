@@ -1,11 +1,10 @@
 # Changelog
 
-## [Unreleased]
+## [0.1.0] - 2026-10-24
 
-Breaking changes, documented as such rather than migrated from: the package is
-pre-1.0 and `private: true`, never published, so no released surface exists to
-alias or deprecate. Each entry below is a break in the type-level contract that
-`0.1.0` described.
+First public release. The package was previously private and unpublished; the
+entries below record the surface it ships with relative to the `0.0.0`
+pre-release baseline. No alias or deprecation exists for the old names.
 
 ### Added
 
@@ -83,7 +82,7 @@ alias or deprecate. Each entry below is a break in the type-level contract that
 - The RouterOS compose file moves to `test/integration/docker-compose.yaml`,
   with router state under `.routeros-data/`.
 
-## [0.1.0] - 2026-10-22 — unreleased baseline
+## [0.0.0] - 2026-10-22 — pre-release baseline
 
 Not a release: the package is `private: true`, never published, and no artifact
 carrying these names exists to upgrade from. This section records the surface the

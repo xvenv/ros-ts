@@ -1,9 +1,24 @@
 {
   "name": "ros-ts",
   "version": "0.1.0",
-  "private": true,
   "description": "Type-safe RouterOS native API client for Node.js",
+  "keywords": [
+    "api",
+    "client",
+    "mikrotik",
+    "routeros",
+    "routeros-api",
+    "typescript"
+  ],
+  "homepage": "https://github.com/xvenv/ros-ts#readme",
+  "bugs": {
+    "url": "https://github.com/xvenv/ros-ts/issues"
+  },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xvenv/ros-ts.git"
+  },
   "files": [
     "dist",
     "README.md",
@@ -16,6 +31,9 @@
     ".": "./dist/index.mjs",
     "./package.json": "./package.json"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vp pack",
     "dev": "vp pack --watch",
@@ -24,7 +42,7 @@
     "check": "vp check",
     "pack:check": "npm pack --dry-run",
     "prepare": "vp config",
-    "prepublishOnly": "vp run build"
+    "prepublishOnly": "npm run check && npm test && npm run build"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",
