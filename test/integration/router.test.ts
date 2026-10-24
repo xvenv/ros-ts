@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import test from 'node:test';
-import { CancelledError, TimeoutError, TrapError } from '../../src/errors.js';
 import { RouterOS } from '../../src/index.js';
+import {
+  CancelledError,
+  TimeoutError,
+  TrapError,
+} from '../../src/shared/index.js';
 
 const hostValue = process.env.ROS_HOST;
 const userValue = process.env.ROS_USER;

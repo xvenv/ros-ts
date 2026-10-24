@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { AsyncQueue } from '../../src/internal/async-queue.js';
+import { AsyncQueue } from '../../../src/shared/index.js';
 
 test('yields buffered values in order', async () => {
   const queue = new AsyncQueue<number>();

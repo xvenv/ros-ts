@@ -2,18 +2,23 @@ import { connect as netConnect, type Socket } from 'node:net';
 import { type ConnectionOptions, connect as tlsConnect } from 'node:tls';
 
 import {
+  encodeSentence,
+  type ParsedReply,
+  parseReply,
+  StreamDecoder,
+} from '../protocol/index.js';
+import {
+  type ClientState,
   ClosedError,
+  type CommandResult,
   ConnectionError,
   FatalError,
   LoginError,
   ProtocolError,
+  type RosRecord,
   RouterOSError,
   TimeoutError,
-} from '../errors.js';
-import { encodeSentence } from '../protocol/codec.js';
-import { StreamDecoder } from '../protocol/decoder.js';
-import { type ParsedReply, parseReply } from '../protocol/sentence.js';
-import type { ClientState, CommandResult, RosRecord } from '../types.js';
+} from '../shared/index.js';
 import { PauseCounter } from './pause-counter.js';
 import { TagMux } from './tag-mux.js';
 import { WriteQueue } from './write-queue.js';

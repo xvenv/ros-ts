@@ -1,9 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { ProtocolError } from '../../src/errors.js';
-import { RouterOS } from '../../src/index.js';
-import { FakeRouter } from '../helpers/fake-router.js';
+import { RouterOS } from '../../../src/index.js';
+import { ProtocolError } from '../../../src/shared/index.js';
+import { FakeRouter } from '../../helpers/fake-router.js';
 
 async function connect(router: FakeRouter): Promise<RouterOS> {
   const promise = RouterOS.connect({

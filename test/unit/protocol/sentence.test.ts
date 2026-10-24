@@ -1,8 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { ProtocolError } from '../../src/errors.js';
-import { parseReply } from '../../src/protocol/sentence.js';
+import { parseReply } from '../../../src/protocol/index.js';
+import { ProtocolError } from '../../../src/shared/index.js';
 
 test('parses a data reply with attributes and a tag', () => {
   const reply = parseReply([

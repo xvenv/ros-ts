@@ -1,8 +1,11 @@
-export const queryExprBrand: unique symbol = Symbol('mikrots.query');
+import {
+  type QueryBuilder,
+  type QueryExpr,
+  type QuerySpec,
+  queryExprBrand,
+} from '../shared/index.js';
 
-export interface QueryExpr {
-  readonly [queryExprBrand]: true;
-}
+export type { QueryBuilder, QueryExpr, QuerySpec } from '../shared/index.js';
 
 interface InternalQueryExpr extends QueryExpr {
   readonly words: readonly string[];
@@ -16,22 +19,6 @@ function makeExpr(words: readonly string[]): QueryExpr {
 export function compileQuery(expression: QueryExpr): readonly string[] {
   return (expression as InternalQueryExpr).words;
 }
-
-export interface QueryBuilder<K extends string> {
-  eq(name: K, value: string): QueryExpr;
-  lt(name: K, value: string): QueryExpr;
-  gt(name: K, value: string): QueryExpr;
-  exists(name: K): QueryExpr;
-  absent(name: K): QueryExpr;
-  not(expression: QueryExpr): QueryExpr;
-  and(...expressions: readonly QueryExpr[]): QueryExpr;
-  or(...expressions: readonly QueryExpr[]): QueryExpr;
-  raw(words: readonly string[]): QueryExpr;
-}
-
-export type QuerySpec<K extends string> =
-  | ((builder: QueryBuilder<K>) => QueryExpr)
-  | readonly string[];
 
 export class QueryBuilderImpl<K extends string> implements QueryBuilder<K> {
   eq(name: K, value: string): QueryExpr {

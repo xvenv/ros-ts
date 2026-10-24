@@ -1,17 +1,19 @@
-import { ProtocolError } from '../errors.js';
-import type { NativeConnectionOptions } from '../transport/connection.js';
-import { NativeConnection } from '../transport/connection.js';
-import type {
-  ClientState,
-  CommandOptions,
-  CommandResult,
-  ConnectOptions,
-  DoneFor,
-  EmptySchema,
-  RowFor,
-  SchemaShape,
-  StreamCommandOptions,
-} from '../types.js';
+import {
+  type ClientState,
+  type CommandOptions,
+  type CommandResult,
+  type ConnectOptions,
+  type DoneFor,
+  type EmptySchema,
+  ProtocolError,
+  type RowFor,
+  type SchemaShape,
+  type StreamCommandOptions,
+} from '../shared/index.js';
+import {
+  NativeConnection,
+  type NativeConnectionOptions,
+} from '../transport/index.js';
 import { compileQuerySpec } from './query.js';
 
 export class RouterOS<S extends SchemaShape = EmptySchema> {

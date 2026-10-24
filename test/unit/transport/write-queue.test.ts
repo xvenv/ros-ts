@@ -4,7 +4,7 @@ import test from 'node:test';
 import {
   type WritableSocket,
   WriteQueue,
-} from '../../src/transport/write-queue.js';
+} from '../../../src/transport/index.js';
 
 class FakeSocket implements WritableSocket {
   readonly writes: string[] = [];

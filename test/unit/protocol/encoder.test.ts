@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { encodeSentence, encodeWord } from '../../src/protocol/codec.js';
+import { encodeSentence, encodeWord } from '../../../src/protocol/index.js';
 
 test('encodeWord prefixes the byte length, not the string length', () => {
   assert.deepEqual([...encodeWord('abc')], [0x03, 0x61, 0x62, 0x63]);

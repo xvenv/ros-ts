@@ -1,4 +1,4 @@
-import type * as root from '../src/index.js';
+import type * as root from '../../src/index.js';
 import type {
   CommandAt,
   EmptySchema,
@@ -9,7 +9,7 @@ import type {
   RowOf,
   SchemaShape,
   StreamPath,
-} from '../src/index.js';
+} from '../../src/index.js';
 import type {
   CoreCommands,
   CoreSchema,

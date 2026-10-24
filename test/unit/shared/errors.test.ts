@@ -11,7 +11,7 @@ import {
   RouterOSError,
   TimeoutError,
   TrapError,
-} from '../src/errors.js';
+} from '../../../src/shared/index.js';
 
 test('ConnectionError carries code, name, syscall, errno, and cause', () => {
   const cause = new Error('ECONNREFUSED');

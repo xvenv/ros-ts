@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { PauseCounter } from '../../src/transport/pause-counter.js';
+import { PauseCounter } from '../../../src/transport/index.js';
 
 test('pauses once while any stream is over its high-water mark', () => {
   const events: string[] = [];

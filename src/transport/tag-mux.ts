@@ -1,13 +1,14 @@
+import type { ParsedReply } from '../protocol/index.js';
 import {
+  AsyncQueue,
   CancelledError,
+  type CommandResult,
   FatalError,
   ProtocolError,
+  type RosRecord,
   TimeoutError,
   TrapError,
-} from '../errors.js';
-import { AsyncQueue } from '../internal/async-queue.js';
-import type { ParsedReply } from '../protocol/sentence.js';
-import type { CommandResult, RosRecord } from '../types.js';
+} from '../shared/index.js';
 
 export interface TagMuxOptions {
   readonly timeoutMs: number;

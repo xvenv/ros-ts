@@ -4,13 +4,13 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 
 /** README claims every TypeScript example on the page is a byte-identical copy
- *  of code the compiler checks under `types-test/` (design spec §8.5). That rule
+ *  of code the compiler checks under `test/types/` (design spec §8.5). That rule
  *  was enforced only by a throwaway script outside the repo, so this file is the
  *  gate: each fenced `ts` block here must appear, line for line and in order, as
- *  one contiguous run inside a `types-test/readme-*.ts` file. */
+ *  one contiguous run inside a `test/types/readme-*.ts` file. */
 
 /** Lines the README and the checked files declare as intentionally different: the
- *  `import` statements (README names the published `mikrots` specifier, the
+ *  `import` statements (README names the published `ros-ts` specifier, the
  *  checked files name `../src/index.js`), and the marker comments that label a
  *  region for a reader of the checked file. Nothing else may differ, and blank
  *  lines are kept, so the run is byte-identical rather than merely equivalent. */
@@ -19,7 +19,7 @@ const NON_COPIED_PATTERNS: readonly RegExp[] = [
   /^\s*\/\/\s*(?:README §|SCAFFOLDING|BOOKKEEPING)/,
 ];
 
-const CHECKED_DIR = new URL('../../types-test/', import.meta.url);
+const CHECKED_DIR = new URL('../types/', import.meta.url);
 
 function isNonCopied(line: string): boolean {
   return NON_COPIED_PATTERNS.some((pattern) => pattern.test(line));
@@ -56,7 +56,7 @@ function checkedFileNames(): string[] {
 /** The checked file's copyable lines, with the declared non-copied lines out. */
 function copiedLines(name: string): string[] {
   const source = readFileSync(
-    fileURLToPath(new URL(`../../types-test/${name}`, import.meta.url)),
+    fileURLToPath(new URL(`../types/${name}`, import.meta.url)),
     'utf8',
   );
   return source.split('\n').filter((line) => !isNonCopied(line));
@@ -89,7 +89,7 @@ const readme = readFileSync(
 
 test('README carries exactly the five TypeScript examples it advertises', () => {
   // Connect, Commands, Author your own types, Streaming, Errors. A sixth block
-  // has to be added here with its counterpart under types-test/, so a deleted
+  // has to be added here with its counterpart under test/types/, so a deleted
   // or extra example cannot pass the parity rule silently.
   assert.equal(readmeTsBlocks(readme).length, 5);
 });
@@ -104,7 +104,7 @@ test('every README TypeScript block is a contiguous run in a checked file', () =
       name,
       undefined,
       `README TypeScript block ${index + 1} (${core.length} lines) is not a ` +
-        `byte-identical run in any types-test/readme-*.ts file`,
+        `byte-identical run in any test/types/readme-*.ts file`,
     );
   }
 });

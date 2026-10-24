@@ -1,0 +1,48 @@
+services:
+  routeros-v6:
+    image: evilfreelancer/docker-routeros:6.49.13
+    container_name: routeros-v6
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+      - /dev/kvm # remove this line on Apple Silicon (no KVM)
+    ports:
+      - "2201:22" # SSH
+      - "2301:23" # Telnet
+      - "8201:80" # WebFig
+      - "8728:8728" # API
+      - "8729:8729" # API-SSL
+      - "8291:8291" # Winbox
+    volumes:
+      - ../../.routeros-data/v6:/data
+    networks:
+      - default
+      - routeros_net
+
+  routeros-v7:
+    image: evilfreelancer/docker-routeros:7.20
+    container_name: routeros-v7
+    restart: unless-stopped
+    cap_add:
+      - NET_ADMIN
+    devices:
+      - /dev/net/tun
+      - /dev/kvm # remove this line on Apple Silicon (no KVM)
+    ports:
+      - "2202:22" # SSH
+      - "2302:23" # Telnet
+      - "8202:80" # WebFig
+      - "9728:8728" # API
+      - "9729:8729" # API-SSL
+      - "9291:8291" # Winbox
+    volumes:
+      - ../../.routeros-data/v7:/data
+    networks:
+      - default
+      - routeros_net
+
+networks:
+  routeros_net:
+    driver: bridge

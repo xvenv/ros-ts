@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
-import { NativeConnection } from '../../src/transport/connection.js';
-import { FakeRouter } from '../helpers/fake-router.js';
+import { NativeConnection } from '../../../src/transport/index.js';
+import { FakeRouter } from '../../helpers/fake-router.js';
 
 function options(port: number) {
   return {

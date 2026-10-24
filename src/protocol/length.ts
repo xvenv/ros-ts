@@ -1,4 +1,4 @@
-import { ProtocolError } from '../errors.js';
+import { ProtocolError } from '../shared/index.js';
 
 export const MAX_WIRE_LENGTH = 0xffffffff;
 

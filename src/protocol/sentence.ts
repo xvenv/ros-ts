@@ -1,4 +1,4 @@
-import { ProtocolError } from '../errors.js';
+import { ProtocolError } from '../shared/index.js';
 
 export type ReplyKind = 're' | 'done' | 'trap' | 'empty' | 'fatal';
 

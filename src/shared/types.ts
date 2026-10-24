@@ -1,6 +1,26 @@
 import type { ConnectionOptions as NodeTlsOptions } from 'node:tls';
 
-import type { QuerySpec } from './client/query.js';
+export const queryExprBrand: unique symbol = Symbol('ros-ts.query');
+
+export interface QueryExpr {
+  readonly [queryExprBrand]: true;
+}
+
+export interface QueryBuilder<K extends string> {
+  eq(name: K, value: string): QueryExpr;
+  lt(name: K, value: string): QueryExpr;
+  gt(name: K, value: string): QueryExpr;
+  exists(name: K): QueryExpr;
+  absent(name: K): QueryExpr;
+  not(expression: QueryExpr): QueryExpr;
+  and(...expressions: readonly QueryExpr[]): QueryExpr;
+  or(...expressions: readonly QueryExpr[]): QueryExpr;
+  raw(words: readonly string[]): QueryExpr;
+}
+
+export type QuerySpec<K extends string> =
+  | ((builder: QueryBuilder<K>) => QueryExpr)
+  | readonly string[];
 
 /** Every value on the native API wire is a string. */
 export type RosValue = string;

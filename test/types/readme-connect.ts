@@ -4,7 +4,7 @@
  * the `import` lines). The `BOOKKEEPING` line exists for the linter only and is
  * not part of any README block.
  */
-import { RouterOS } from '../src/index.js';
+import { RouterOS } from '../../src/index.js';
 
 await using client = await RouterOS.connect({
   host: 'router.example.net',

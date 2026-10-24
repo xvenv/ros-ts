@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
+import type { CommandResult } from '../../../src/shared/index.js';
 import {
   ClosedError,
   ConnectionError,
@@ -8,10 +8,9 @@ import {
   LoginError,
   ProtocolError,
   TimeoutError,
-} from '../../src/errors.js';
-import { NativeConnection } from '../../src/transport/connection.js';
-import type { CommandResult } from '../../src/types.js';
-import { FakeRouter } from '../helpers/fake-router.js';
+} from '../../../src/shared/index.js';
+import { NativeConnection } from '../../../src/transport/index.js';
+import { FakeRouter } from '../../helpers/fake-router.js';
 
 function options(port: number) {
   return {

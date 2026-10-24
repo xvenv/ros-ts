@@ -1,9 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
-import { ProtocolError } from '../../src/errors.js';
-import { encodeSentence } from '../../src/protocol/codec.js';
-import { StreamDecoder } from '../../src/protocol/decoder.js';
+import { encodeSentence, StreamDecoder } from '../../../src/protocol/index.js';
+import { ProtocolError } from '../../../src/shared/index.js';
 
 function decodeInChunks(buffer: Buffer, sizes: readonly number[]): string[][] {
   const decoder = new StreamDecoder();

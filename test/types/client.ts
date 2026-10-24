@@ -1,11 +1,11 @@
-import { RouterOS } from '../src/index.js';
 import type {
   PrintCommand,
   RosSwitch,
   RowFor,
   SchemaShape,
   StreamCommand,
-} from '../src/types.js';
+} from '../../src/index.js';
+import { RouterOS } from '../../src/index.js';
 import type {
   CoreSchema,
   CoreStreams,
@@ -276,7 +276,7 @@ void undeclaredPathIsUnchecked;
 /**
  * Ruling on the catalog conflict Task 2 left open: when one schema declares the
  * same path in `commands` and in `streams`, the stream catalog wins, because
- * `RowFor` tests `StreamPath` first (`src/types.ts`). `command()` resolves
+ * `RowFor` tests `StreamPath` first (`src/shared/types.ts`). `command()` resolves
  * through the same `RowFor`, so the print row is shadowed for both verbs. If the
  * precedence is ever inverted these pins fail: the stream field stops
  * resolving, the print field starts resolving, and the directives go unused.

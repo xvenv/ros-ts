@@ -1,5 +1,5 @@
-import { ProtocolError } from '../errors.js';
-import type { WireEncoding } from './codec.js';
+import { ProtocolError } from '../shared/index.js';
+import type { WireEncoding } from './encoder.js';
 import { decodeLength } from './length.js';
 
 export interface DecoderOptions {

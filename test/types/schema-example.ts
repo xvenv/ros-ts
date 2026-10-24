@@ -22,7 +22,7 @@
  *   live replies on RouterOS 6.49.13 and 7.20.8. Every other record field is a
  *   conservative projection of the schema source, never compared to a reply, so
  *   treat it as a name you can ask for, not as a promise the router sends it.
- * - An `add` reply is typed with the shipped `AddDone` (`src/types.ts`), not a
+ * - An `add` reply is typed with the shipped `AddDone` (`src/shared/types.ts`), not a
  *   second local copy: `command()` already resolves every `/add` path to it, so
  *   declaring `{ ret: string }` again here would teach the copied rule to
  *   diverge from the shipped one.
@@ -36,7 +36,7 @@ import type {
   RosSwitch,
   SchemaShape,
   StreamCommand,
-} from '../src/types.js';
+} from '../../src/index.js';
 
 /* -------------------------------------------------------------------------- *
  * Records

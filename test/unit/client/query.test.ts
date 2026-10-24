@@ -6,7 +6,7 @@ import {
   compileQuerySpec,
   QueryBuilderImpl,
   type QueryExpr,
-} from '../../src/client/query.js';
+} from '../../../src/client/query.js';
 
 type Key = 'interface' | 'disabled' | 'comment' | 'type';
 

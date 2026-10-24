@@ -1,15 +1,14 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-
+import type { ParsedReply, ReplyKind } from '../../../src/protocol/index.js';
 import {
   CancelledError,
   FatalError,
   ProtocolError,
   TimeoutError,
   TrapError,
-} from '../../src/errors.js';
-import type { ParsedReply, ReplyKind } from '../../src/protocol/sentence.js';
-import { TagMux } from '../../src/transport/tag-mux.js';
+} from '../../../src/shared/index.js';
+import { TagMux } from '../../../src/transport/index.js';
 
 function reply(
   kind: ReplyKind,

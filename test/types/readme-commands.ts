@@ -8,7 +8,7 @@
  * `SCAFFOLDING` or `BOOKKEEPING` hold the blocks together for the compiler and
  * the linter and are not part of any README block.
  */
-import { RouterOS, TrapError } from '../src/index.js';
+import { RouterOS, TrapError } from '../../src/index.js';
 
 // SCAFFOLDING: README §Connect introduces these three with literal values.
 const host = 'router.example.net';
