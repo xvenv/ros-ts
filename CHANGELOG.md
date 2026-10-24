@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.1.1] - 2026-10-24
+
+Documentation-only patch; no API or runtime change.
+
+### Fixed
+
+- The README shipped in the npm tarball no longer claims the package is
+  unpublished. The 0.1.0 tarball carried that line because it was packed before
+  the status was updated, and npm cannot replace a published version, so the
+  correction ships here.
+
 ## [0.1.0] - 2026-10-24
 
 First public release. The package was previously private and unpublished; the
