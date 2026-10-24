@@ -11,7 +11,7 @@ alias or deprecate. Each entry below is a break in the type-level contract that
 
 - `EmptySchema` enters the package's explicit public export list, so a consumer
   can name the default the client now carries instead of spelling the shape out.
-  The entry is pinned by name in `types-test/public-api.ts`: removing it from
+  The entry is pinned by name in `test/types/public-api.ts`: removing it from
   `src/index.ts` fails the type-check gate rather than passing review.
 
 ### Changed
@@ -44,7 +44,7 @@ alias or deprecate. Each entry below is a break in the type-level contract that
   may only specify known properties"). `command()` takes
   `attrs: Record<string, RosNumbers | number>`, which checks nothing about a key
   even on a path the schema declares: the router answers it, not the compiler.
-  Pinned as a documented non-check in `types-test/client.ts`, whose
+  Pinned as a documented non-check in `test/types/client.ts`, whose
   `declaredSchemaChecksKeys` and `undeclaredPathIsUnchecked` hold the half that
   is still checked.
 - An `/add` reply that carries no `ret` now rejects with `ProtocolError`
@@ -55,19 +55,29 @@ alias or deprecate. Each entry below is a break in the type-level contract that
   failure, so the connection stays `ready`; `command rejects an add reply that
   carries no ret` in `test/client/client.test.ts` pins both halves.
 - The curated command catalog is no longer shipped or exported. It moves to
-  `types-test/schema-example.ts` as a copyable, type-checked example of
+  `test/types/schema-example.ts` as a copyable, type-checked example of
   consumer-authored types; nothing in the package depends on it and it is not
-  reachable from `mikrots`.
+  reachable from `ros-ts`.
 - The package-root type export list is explicit. `export type *` barrels are
-  gone, so a new name in `src/types.ts` no longer becomes public by accident;
+  gone, so a new name in `src/shared/types.ts` no longer becomes public by accident;
   the published list is now reviewable and pinned by
-  `types-test/public-api.ts`.
+  `test/types/public-api.ts`.
 - Per-command numeric options are validated at call time, as the connect-time
   ones always were. `command(path, { timeoutMs })` and
   `stream(path, { highWaterMark })` now throw `RangeError` for a value that is
   not positive (and, for `highWaterMark`, not an integer) instead of letting
   `setTimeout` clamp a negative or NaN delay to an immediate fire, or the record
   queue reject from the iterator's first `next()`.
+- The package is renamed from `mikrots` to `ros-ts` and the repository is
+  restructured into `client`, `transport`, `protocol`, and `shared` layers.
+  Nothing was ever published under either name, and runtime behavior and the
+  public API are unchanged; the rename is recorded because the type-level import
+  specifier changes.
+- Tests now run on Vitest through Vite+ (`npm test`), and the repository uses
+  Oxlint and Oxfmt through `vp check`. The custom TypeScript loader, Biome, and
+  `node:test` are gone.
+- The RouterOS compose file moves to `test/integration/docker-compose.yaml`,
+  with router state under `.routeros-data/`.
 
 ## [0.1.0] - 2026-10-22 — unreleased baseline
 

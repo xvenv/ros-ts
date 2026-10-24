@@ -1,4 +1,4 @@
-# mikrots
+# ros-ts
 
 Type-safe RouterOS native API client for Node.js 24+.
 
@@ -15,20 +15,20 @@ which menus mean what is yours to declare, and the client does the checking
 once you do.
 
 Every TypeScript example on this page is copied from code the compiler checks
-under `types-test/` (`readme-connect.ts`, `readme-commands.ts`,
+under `test/types/` (`readme-connect.ts`, `readme-commands.ts`,
 `readme-schema.ts`). The `import` lines are the one exception: in the README
-they name the published `mikrots` specifier and list only what that section
+they name the published `ros-ts` specifier and list only what that section
 uses, while the checked files import from `../src/index.js`. Every other line
 is byte-identical, and that rule is a gate rather than a convention:
 `test/docs/readme-examples.test.ts` extracts each fenced block from this page and
 requires it to be one contiguous run in a checked file, with a mutated copy that
 has to stop matching. The three `bash` blocks and the unlabelled error tree are
 this page's only other examples, and nothing compiles them: the tree mirrors the
-classes and codes declared in `src/errors.ts`, and the install and run blocks
+classes and codes declared in `src/shared/errors.ts`, and the install and run blocks
 name the package and the scripts in `package.json`. That is as far as those two
 files reach — the tree's `(connection closed by a wire failure)` annotation is a
 runtime claim, held instead by `command rejects an add reply that carries no ret`
-in `test/client/client.test.ts`, and the `ROS_*` names were read from
+in `test/unit/client/client.test.ts`, and the `ROS_*` names were read from
 `test/integration/router.test.ts`.
 
 ## Install
@@ -36,13 +36,13 @@ in `test/client/client.test.ts`, and the `ROS_*` names were read from
 Not yet published to npm (`private: true` until release). Once published:
 
 ```bash
-npm install mikrots
+npm install ros-ts
 ```
 
 ## Connect
 
 ```ts
-import { RouterOS } from 'mikrots';
+import { RouterOS } from 'ros-ts';
 
 await using client = await RouterOS.connect({
   host: 'router.example.net',
@@ -131,7 +131,7 @@ the checking is of keys only:
   `command()` returns the row your schema declares, so a field you did not
   project is still reachable from it.
 
-Both halves are pinned in `types-test/client.ts` — `declaredSchemaChecksKeys`
+Both halves are pinned in `test/types/client.ts` — `declaredSchemaChecksKeys`
 and `undeclaredPathIsUnchecked` — so reinstating a shipped catalog silently
 would fail the type-check gate instead of passing a review.
 
@@ -141,8 +141,8 @@ Declaring your own types turns the checking on, for the menus you actually use.
 The block below is the whole cost, and nothing in it comes from a catalog:
 
 ```ts
-import type { MutateCommand, PrintCommand, SchemaShape } from 'mikrots';
-import { RouterOS } from 'mikrots';
+import type { MutateCommand, PrintCommand, SchemaShape } from 'ros-ts';
+import { RouterOS } from 'ros-ts';
 
 interface WirelessCatalog {
   '/interface/wireless/print': PrintCommand<{
@@ -172,7 +172,7 @@ const links = await wireless.command('/interface/wireless/print', {
 });
 // Declaring the row buys two things: the type you get back, and a rejection of
 // any key the schema does not list, on `proplist`, on `query`, on `command()`
-// and `stream()` alike (pinned in `types-test/client.ts`).
+// and `stream()` alike (pinned in `test/types/client.ts`).
 // @ts-expect-error 'typ' is not a field of the declared row
 void links.records[0]?.typ;
 // @ts-expect-error 'typ' is not a field of the declared row
@@ -183,14 +183,14 @@ void wireless.command('/interface/wireless/print', { proplist: ['typ'] });
 `StreamCommand<Item>` gives `stream()` that item type. The two
 `@ts-expect-error` lines are the point of the whole section: each marks a
 rejection the compiler actually reports, so this block is checked in
-`types-test/readme-schema.ts` and a key `typ` cannot slip past a schema that
+`test/types/readme-schema.ts` and a key `typ` cannot slip past a schema that
 does not list it.
 
-`types-test/schema-example.ts` is the copyable reference for a larger hand-written
+`test/types/schema-example.ts` is the copyable reference for a larger hand-written
 schema: 64 commands (17 print, 47 mutate) and 2 streams across the interface,
 queue, IP, system, and log menus, with their record and argument types. **It is
 an example, not a shipped catalog.** It lives in the type-check directory,
-nothing in `mikrots` depends on it, and it is not exported from the package; its
+nothing in `ros-ts` depends on it, and it is not exported from the package; its
 header states which parts were verified and how.
 
 ## Streaming
@@ -224,7 +224,7 @@ RouterOSError
 ```
 
 ```ts
-import { TrapError } from 'mikrots';
+import { TrapError } from 'ros-ts';
 
 try {
   await client.command('/ip/address/print');
@@ -246,7 +246,7 @@ command's own reply check — the ret-less `/add` above — rejects that command
 leaves the connection `ready`, so unrelated in-flight commands are unaffected.
 The state is pinned after the rejection in
 `command rejects an add reply that carries no ret`
-(`test/client/client.test.ts`).
+(`test/unit/client/client.test.ts`).
 
 ## Supported versions
 
@@ -271,20 +271,19 @@ depends on.
 ## Tests
 
 ```bash
-npm test             # unit and contract tests
-npm run typecheck    # source, tests, and compile-time type tests
-npm run lint         # Biome formatting, import order, and lint rules
-npm run check        # typecheck + lint + test
-npm run build        # emit dist/; never cleans it
-npm run pack:check   # npm pack --dry-run; review the file list
+npm test                  # unit and doc-parity tests (Vitest via Vite+)
+npm run check             # format, lint, type-check, and type-tests
+npm run build             # emit dist/ via vp pack; never cleans it
+npm run pack:check        # npm pack --dry-run; review the file list
+npm run test:integration  # opt-in; needs ROS_HOST and ROS_USER
 ```
 
 `npm run build` does not clean `dist/`, so the pack gate is honest only as
 `rm -rf dist && npm run build && npm run pack:check` — otherwise a file some
 later task deleted can still sit in the packed list.
 
-Integration tests are opt-in and skip when `ROS_HOST` and `ROS_USER` are
-absent:
+Integration tests are opt-in and are not part of the default Vitest run
+unless `ROS_HOST` is set:
 
 ```bash
 ROS_HOST=router.example.net ROS_USER=admin ROS_PASSWORD=secret \
@@ -301,8 +300,12 @@ ROS_HOST=router.example.net ROS_USER=admin ROS_PASSWORD=secret \
 | `ROS_TLS_INSECURE` | `1` sets `rejectUnauthorized: false`; test devices only    |
 | `ROS_TEST_WRITE`   | `1` enables the write subtest; dedicated test devices only |
 
+Start the two routers with
+`docker compose -f test/integration/docker-compose.yaml up -d`. Router state is
+written under `.routeros-data/`, which is gitignored.
+
 The default run is read-only. The write subtest creates a
-`mikrots-test-<uuid>` simple queue, checks a UTF-8 comment and rate update,
+`ros-ts-test-<uuid>` simple queue, checks a UTF-8 comment and rate update,
 and removes the queue in a `finally` block. Run it only against a test
 device, never production.
 

@@ -35,7 +35,7 @@ const links = await wireless.command('/interface/wireless/print', {
 });
 // Declaring the row buys two things: the type you get back, and a rejection of
 // any key the schema does not list, on `proplist`, on `query`, on `command()`
-// and `stream()` alike (pinned in `types-test/client.ts`).
+// and `stream()` alike (pinned in `test/types/client.ts`).
 // @ts-expect-error 'typ' is not a field of the declared row
 void links.records[0]?.typ;
 // @ts-expect-error 'typ' is not a field of the declared row
