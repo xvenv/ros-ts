@@ -1,13 +1,13 @@
 /**
  * The schema example README links: a hand-written catalog for one operator's
  * routers. It is an example, not a shipped catalog — not published in the
- * package, not exported from `mikrots`, not exhaustive, and nothing in the
+ * package, not exported from `ros-ts`, not exhaustive, and nothing in the
  * client depends on it. Copy this shape into your own project and keep only the
  * menus you use; the import below names this repo's source files, and in your
- * project the same names come from `mikrots`.
+ * project the same names come from `ros-ts`.
  *
  * What "verified" means for this file, per
- * docs/superpowers/specs/2026-10-22-routeros-native-client-design.md §7.2 and
+ * docs/design/2026-10-22-routeros-native-client-design.md §7.2 and
  * §8.3, stated at the level the evidence supports:
  *
  * - Command paths and the typed argument interfaces were checked field-by-field

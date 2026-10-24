@@ -123,7 +123,7 @@ the checking is of keys only:
   own vocabulary.
 - Query **values** are never checked. `q.eq('disabled', 'maybe')` compiles,
   because the builder's value parameter is the wire's own `string`
-  (`src/client/query.ts:21`). This is a deliberate non-goal, not a gap: the
+  (`src/client/query.ts:24`). This is a deliberate non-goal, not a gap: the
   accepted sets differ per RouterOS version, so enum narrowing is deferred to
   per-version generated schemas (the 2026-10-22 spec §7.2) and the client keeps
   the wire's vocabulary in the meantime (design spec §4.3).
@@ -192,6 +192,35 @@ queue, IP, system, and log menus, with their record and argument types. **It is
 an example, not a shipped catalog.** It lives in the type-check directory,
 nothing in `ros-ts` depends on it, and it is not exported from the package; its
 header states which parts were verified and how.
+
+## Good practices for schema interfaces
+
+These rules keep a hand-written schema useful instead of decorative. They match
+the checked example above and `test/types/schema-example.ts`.
+
+- Prefer `interface` for standalone object shapes: rows, mutation arguments,
+  and the schema itself. Use `type` for unions, literals, intersections, and
+  aliases such as `BridgeSetArgs`.
+- Never extend `RosRecord` for a declared row. It adds a
+  `Record<string, string>` index signature, so every key becomes valid and the
+  `proplist`/`query` key checks stop discriminating. Declare the fields by name.
+- Mark every field `readonly` and keep wire values as `string`. Use `?` when a
+  field is not guaranteed on every supported RouterOS version; do not use `!` on
+  a row.
+- Keep `Row` and `Args` separate. A print row is not a mutation payload even
+  when the keys overlap.
+- Model only the fields you use. A field the row omits is a compile error at the
+  call site; add it when you need it rather than copying the whole menu.
+- Use `RosSwitch` for boolean-like values, `RosNumbers` for a string or a
+  comma-joined list of strings (an `attrs` value also accepts a number), and
+  `RosFlag` for protocol events such as `dead=yes`.
+- Put the RouterOS version in `rosVersion` as a literal and keep one schema per
+  version or feature. Do not paste a catalog into every consumer.
+- Remember that `attrs` keys are not checked against the schema. If you need
+  that check, validate in your own wrapper; the library deliberately keeps the
+  wire vocabulary open.
+- Pin the rejections you rely on with `@ts-expect-error` in your own type tests,
+  the way `test/types/client.ts` does here.
 
 ## Streaming
 

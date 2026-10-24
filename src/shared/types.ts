@@ -157,7 +157,7 @@ export type DoneFor<P extends string> = P extends `${string}/add` ? AddDone : Ro
  *  The stream catalog wins a conflict: a schema that declares one path in both
  *  `streams` and `commands` resolves to the stream item for `stream()` and for
  *  `command()` alike, because the stream branch is tested first. Pinned by
- *  `streamCatalogWinsADualDeclaredPath` in `types-test/client.ts`. */
+ *  `streamCatalogWinsADualDeclaredPath` in `test/types/client.ts`. */
 export type RowFor<S extends SchemaShape, P extends string> =
   P extends StreamPath<S>
     ? ItemOf<StreamAt<S, P>>

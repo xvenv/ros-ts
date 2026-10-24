@@ -194,7 +194,7 @@ void defaultSchemaPromisesNothing;
  * `command()` and `stream()`.
  *
  * Keys only. The builder's value parameter is the wire's own `string`
- * (`src/client/query.ts:21`, `eq(name: K, value: string)`), so a field typed
+ * (`src/client/query.ts:24`, `eq(name: K, value: string)`), so a field typed
  * `RosSwitch` still accepts `'maybe'`. That is a deliberate non-goal, not a
  * gap: the accepted sets differ per RouterOS version, so enum narrowing is
  * deferred to generated per-version schemas (the 2026-10-22 spec §7.2) while
@@ -250,7 +250,7 @@ void declaredSchemaChecksKeys;
  * schema declared the client has no vocabulary to check against, so a typo key
  * compiles on any path and the router's own reply decides the result. Nobody
  * may "fix" this by reinstating a catalog in the library — this block is the
- * regression test for that, and `test/client/client.test.ts` proves the typo
+ * regression test for that, and `test/unit/client/client.test.ts` proves the typo
  * still reaches the wire instead of being dropped or rewritten.
  */
 async function undeclaredPathIsUnchecked(): Promise<void> {

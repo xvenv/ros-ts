@@ -5,6 +5,8 @@ const integration = Boolean(process.env.ROS_HOST);
 const layer = (files: string[], group: string[], message: string) => ({
   files,
   rules: {
+    // The rule tuple has to be asserted; an untyped array widens and the
+    // OxlintOverride type rejects it.
     'no-restricted-imports': ['error', { patterns: [{ group, message }] }] as [
       'error',
       { patterns: { group: string[]; message: string }[] },
@@ -21,7 +23,6 @@ export default defineConfig({
     exports: true,
   },
   lint: {
-    ignorePatterns: ['draft/**'],
     options: {
       typeAware: true,
       typeCheck: true,
