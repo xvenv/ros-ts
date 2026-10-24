@@ -8,6 +8,7 @@ import {
   FatalError,
   LoginError,
   ProtocolError,
+  ReconnectError,
   RouterOSError,
   TimeoutError,
   TrapError,
@@ -48,6 +49,18 @@ test('each error exposes its documented code', () => {
   assert.equal(new FatalError('fatal').code, 'FATAL');
   assert.equal(new TimeoutError('late', 'command', 1000).code, 'TIMEOUT');
   assert.equal(new CancelledError('stop').code, 'CANCELLED');
+  assert.equal(new ReconnectError().code, 'RECONNECT');
+});
+
+test('ReconnectError exposes the reconnect code and its messages', () => {
+  const fallback = new ReconnectError();
+  assert.ok(fallback instanceof RouterOSError);
+  assert.equal(fallback.code, 'RECONNECT');
+  assert.equal(fallback.name, 'ReconnectError');
+  assert.equal(fallback.message, 'Connection replaced by reconnect');
+
+  const custom = new ReconnectError('Reconnecting');
+  assert.equal(custom.message, 'Reconnecting');
 });
 
 test('TimeoutError and CancelledError keep their details', () => {

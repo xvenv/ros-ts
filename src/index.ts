@@ -45,6 +45,7 @@ export {
   FatalError,
   LoginError,
   ProtocolError,
+  ReconnectError,
   RouterOSError,
   TimeoutError,
   TrapError,

@@ -43,6 +43,7 @@ export type ClientState =
   | 'connecting'
   | 'logging-in'
   | 'ready'
+  | 'reconnecting'
   | 'closing'
   | 'closed';
 

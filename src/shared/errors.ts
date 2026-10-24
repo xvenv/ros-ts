@@ -6,7 +6,8 @@ export type RouterOSErrorCode =
   | 'TRAP'
   | 'FATAL'
   | 'TIMEOUT'
-  | 'CANCELLED';
+  | 'CANCELLED'
+  | 'RECONNECT';
 
 export class RouterOSError extends Error {
   readonly code: RouterOSErrorCode;
@@ -105,5 +106,13 @@ export class CancelledError extends RouterOSError {
   constructor(message: string, reason?: unknown) {
     super('CANCELLED', message);
     this.reason = reason;
+  }
+}
+
+export class ReconnectError extends RouterOSError {
+  declare readonly code: 'RECONNECT';
+
+  constructor(message = 'Connection replaced by reconnect') {
+    super('RECONNECT', message);
   }
 }

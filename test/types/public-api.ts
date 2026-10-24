@@ -1,5 +1,6 @@
 import type * as root from '../../src/index.js';
 import type {
+  ClientState,
   CommandAt,
   EmptySchema,
   ItemOf,
@@ -10,6 +11,7 @@ import type {
   SchemaShape,
   StreamPath,
 } from '../../src/index.js';
+import { ReconnectError } from '../../src/index.js';
 import type {
   CoreCommands,
   CoreSchema,
@@ -81,6 +83,12 @@ const switchValue2: RosSwitch = 'no';
 // @ts-expect-error boolean-like fields are strings, not booleans
 const badSwitch: RosSwitch = '1';
 
+type ReconnectingState = 'reconnecting' extends ClientState ? true : false;
+const reconnectingState: ReconnectingState = true;
+
+const reconnectError = new ReconnectError();
+const reconnectCode: 'RECONNECT' = reconnectError.code;
+
 void schemaCheck;
 void unreachableCatalog;
 void unreachableInternals;
@@ -97,3 +105,6 @@ void deadFlag;
 void switchValue;
 void switchValue2;
 void badSwitch;
+void reconnectingState;
+void reconnectError;
+void reconnectCode;
