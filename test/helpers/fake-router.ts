@@ -38,6 +38,10 @@ export class FakeRouter {
     return address.port;
   }
 
+  get connectionCount(): number {
+    return this.sockets.size;
+  }
+
   async nextCommand(): Promise<FakeCommand> {
     const command = this.commands.shift();
     if (command !== undefined) return command;

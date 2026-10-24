@@ -93,7 +93,13 @@ export class NativeConnection {
     this.socket.on('close', () => this.onSocketClose());
   }
 
-  static async connect(options: NativeConnectionOptions): Promise<NativeConnection> {
+  static async connect(
+    options: NativeConnectionOptions,
+    signal?: AbortSignal,
+  ): Promise<NativeConnection> {
+    if (signal?.aborted) {
+      throw new ClosedError('Connection attempt aborted');
+    }
     const socket =
       options.tls === false
         ? netConnect({ host: options.host, port: options.port })
@@ -103,7 +109,7 @@ export class NativeConnection {
             ...(typeof options.tls === 'object' ? options.tls : {}),
           });
     const connection = new NativeConnection(options, socket, options.password);
-    await connection.open();
+    await connection.open(signal);
     return connection;
   }
 
@@ -135,14 +141,13 @@ export class NativeConnection {
     return this.mux.stream(words, options);
   }
 
-  async close(): Promise<void> {
+  async close(error: RouterOSError = new ClosedError()): Promise<void> {
     if (this.stateValue === 'closed' || this.stateValue === 'closing') {
       await this.closedPromise;
       return;
     }
     this.closedByUser = true;
     this.stateValue = 'closing';
-    const error = new ClosedError();
     this.mux.failAll(error);
     this.writeQueue.fail(error);
     this.loginReject?.(error);
@@ -157,8 +162,16 @@ export class NativeConnection {
     return this.close();
   }
 
-  private async open(): Promise<void> {
+  private async open(signal?: AbortSignal): Promise<void> {
     this.stateValue = 'connecting';
+    let removeAbort: (() => void) | undefined;
+    const aborted = new Promise<never>((_resolve, reject) => {
+      if (signal === undefined) return;
+      const onAbort = () => reject(new ClosedError('Connection attempt aborted'));
+      signal.addEventListener('abort', onAbort, { once: true });
+      removeAbort = () => signal.removeEventListener('abort', onAbort);
+    });
+
     const timeout = new Promise<never>((_resolve, reject) => {
       const timer = setTimeout(() => {
         reject(
@@ -174,7 +187,10 @@ export class NativeConnection {
     });
 
     try {
-      await Promise.race([this.waitForConnect(), timeout]);
+      await Promise.race([this.waitForConnect(), timeout, aborted]);
+      if (signal?.aborted) {
+        throw new ClosedError('Connection attempt aborted');
+      }
       this.socket.setNoDelay(true);
       this.socket.setKeepAlive(this.options.keepAlive);
       this.stateValue = 'logging-in';
@@ -188,8 +204,11 @@ export class NativeConnection {
       const words = ['/login', `=name=${this.options.user}`, `=password=${password}`];
       this.password = undefined;
       await this.writeQueue.write(this.encode(words));
-      await Promise.race([login, timeout]);
+      await Promise.race([login, timeout, aborted]);
 
+      if (signal?.aborted) {
+        throw new ClosedError('Connection attempt aborted');
+      }
       if (this.failure !== undefined) {
         throw this.failure;
       }
@@ -209,6 +228,8 @@ export class NativeConnection {
             );
       this.fail(wrapped, true);
       throw wrapped;
+    } finally {
+      removeAbort?.();
     }
   }
 

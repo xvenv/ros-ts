@@ -7,6 +7,7 @@ import {
   FatalError,
   LoginError,
   ProtocolError,
+  ReconnectError,
   TimeoutError,
 } from '../../../src/shared/index.js';
 import { NativeConnection } from '../../../src/transport/index.js';
@@ -43,6 +44,17 @@ async function connect(router: FakeRouter): Promise<NativeConnection> {
   await router.nextCommand();
   router.send(['!done']);
   return promise;
+}
+
+async function waitForConnectionCount(
+  router: FakeRouter,
+  count: number,
+): Promise<void> {
+  for (let attempt = 0; attempt < 100; attempt += 1) {
+    if (router.connectionCount === count) return;
+    await new Promise<void>((resolve) => setTimeout(resolve, 1));
+  }
+  assert.equal(router.connectionCount, count);
 }
 
 test('connects, logs in, and runs a tagged command', async () => {
@@ -263,3 +275,47 @@ test(
     await router.close();
   },
 );
+
+test('close fails pending commands with the supplied error', async () => {
+  const router = await FakeRouter.start();
+  const connection = await connect(router);
+
+  const pending = connection.run(['/system/identity/print']);
+  const command = await router.nextCommand();
+  assert.ok(command.tag);
+
+  const rejected = assert.rejects(pending, ReconnectError);
+  await connection.close(new ReconnectError('Connection replaced by reconnect'));
+  await rejected;
+
+  await router.close();
+});
+
+test('connect rejects an already-aborted signal without a socket', async () => {
+  const router = await FakeRouter.start();
+  const controller = new AbortController();
+  controller.abort();
+
+  await assert.rejects(
+    NativeConnection.connect(options(router.port), controller.signal),
+    ClosedError,
+  );
+  assert.equal(router.connectionCount, 0);
+
+  await router.close();
+});
+
+test('aborting during login rejects with ClosedError', async () => {
+  const router = await FakeRouter.start();
+  const controller = new AbortController();
+  const connecting = NativeConnection.connect(options(router.port), controller.signal);
+
+  const login = await router.nextCommand();
+  assert.deepEqual(login.words, ['/login', '=name=admin', '=password=secret']);
+  controller.abort();
+
+  await assert.rejects(connecting, ClosedError);
+  await waitForConnectionCount(router, 0);
+
+  await router.close();
+});
