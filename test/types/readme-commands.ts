@@ -3,7 +3,7 @@
  * file so a README example cannot ship broken (design spec §8.5; the sibling
  * files `readme-connect.ts` and `readme-schema.ts` hold the rest). Every line
  * is byte-identical except the `import` lines: README names the published
- * `ros-ts` specifier and lists only what that section uses, while this file
+ * `@xvenv/ros-ts` specifier and lists only what that section uses, while this file
  * merges the imports into one `../src/index.js` statement. Lines marked
  * `SCAFFOLDING` or `BOOKKEEPING` hold the blocks together for the compiler and
  * the linter and are not part of any README block.

@@ -1,4 +1,4 @@
-# ros-ts
+# @xvenv/ros-ts
 
 Type-safe client for the MikroTik RouterOS **native API** over TCP 8728 or TLS 8729. ESM-only, zero runtime dependencies, Node 24+.
 
@@ -10,16 +10,16 @@ Type-safe client for the MikroTik RouterOS **native API** over TCP 8728 or TLS 8
 
 ## Install
 
-Not yet published (`private: true`). Once published:
+Not yet published. Once published:
 
 ```bash
-npm install ros-ts
+npm install @xvenv/ros-ts
 ```
 
 ## Quick start
 
 ```ts
-import { RouterOS } from 'ros-ts';
+import { RouterOS } from '@xvenv/ros-ts';
 
 await using client = await RouterOS.connect({
   host: 'router.example.net',
@@ -79,8 +79,8 @@ without `ret` rejects with `ProtocolError`. Wire values stay strings.
 Declare the paths you use; nothing comes from a catalog:
 
 ```ts
-import type { MutateCommand, PrintCommand, SchemaShape } from 'ros-ts';
-import { RouterOS } from 'ros-ts';
+import type { MutateCommand, PrintCommand, SchemaShape } from '@xvenv/ros-ts';
+import { RouterOS } from '@xvenv/ros-ts';
 
 interface WirelessCatalog {
   '/interface/wireless/print': PrintCommand<{
@@ -175,7 +175,7 @@ RouterOSError
 ```
 
 ```ts
-import { TrapError } from 'ros-ts';
+import { TrapError } from '@xvenv/ros-ts';
 
 try {
   await client.command('/ip/address/print');

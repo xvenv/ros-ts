@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
  *  one contiguous run inside a `test/types/readme-*.ts` file. */
 
 /** Lines the README and the checked files declare as intentionally different: the
- *  `import` statements (README names the published `ros-ts` specifier, the
+ *  `import` statements (README names the published `@xvenv/ros-ts` specifier, the
  *  checked files name `../src/index.js`), and the marker comments that label a
  *  region for a reader of the checked file. Nothing else may differ, and blank
  *  lines are kept, so the run is byte-identical rather than merely equivalent. */

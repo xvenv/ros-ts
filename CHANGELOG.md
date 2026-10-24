@@ -60,7 +60,7 @@ pre-release baseline. No alias or deprecation exists for the old names.
 - The curated command catalog is no longer shipped or exported. It moves to
   `test/types/schema-example.ts` as a copyable, type-checked example of
   consumer-authored types; nothing in the package depends on it and it is not
-  reachable from `ros-ts`.
+  reachable from `@xvenv/ros-ts`.
 - The package-root type export list is explicit. `export type *` barrels are
   gone, so a new name in `src/shared/types.ts` no longer becomes public by accident;
   the published list is now reviewable and pinned by
@@ -71,7 +71,7 @@ pre-release baseline. No alias or deprecation exists for the old names.
   not positive (and, for `highWaterMark`, not an integer) instead of letting
   `setTimeout` clamp a negative or NaN delay to an immediate fire, or the record
   queue reject from the iterator's first `next()`.
-- The package is renamed from `mikrots` to `ros-ts` and the repository is
+- The package is renamed from `mikrots` to `@xvenv/ros-ts` and the repository is
   restructured into `client`, `transport`, `protocol`, and `shared` layers.
   Nothing was ever published under either name, and runtime behavior and the
   public API are unchanged; the rename is recorded because the type-level import

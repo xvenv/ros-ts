@@ -12,5 +12,5 @@ coverage
 !.vscode/extensions.json
 
 # Local agent instructions and design notes; not published.
-AGENTS.md
-docs/
+/AGENTS.md
+/docs/
