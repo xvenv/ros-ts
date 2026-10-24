@@ -6,14 +6,13 @@
  * menus you use; the import below names this repo's source files, and in your
  * project the same names come from `ros-ts`.
  *
- * What "verified" means for this file, per
- * docs/design/2026-10-22-routeros-native-client-design.md §7.2 and
- * §8.3, stated at the level the evidence supports:
+ * What "verified" means for this file, stated at the level the evidence
+ * supports:
  *
  * - Command paths and the typed argument interfaces were checked field-by-field
- *   against the RouterOS 7.24.5 `inspect.json` in the `tikoci/restraml` tree, as
- *   spec §7.2 records. That tree is not vendored here (`references/` is
- *   gitignored), so this is a recorded check, not one a fresh clone can rerun.
+ *   against the RouterOS 7.24.5 `inspect.json` in the `tikoci/restraml` tree.
+ *   That tree is not vendored here, so this is a recorded check, not one a
+ *   fresh clone can rerun.
  *   Where this file composes a type out of another
  *   (`type BridgeSetArgs = NumbersArgs & Partial<BridgeAddArgs>`), the
  *   composition is derived from a verified interface, not separately verified.
