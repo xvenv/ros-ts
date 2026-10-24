@@ -1,11 +1,13 @@
 import {
   type ClientState,
+  ClosedError,
   type CommandOptions,
   type CommandResult,
   type ConnectOptions,
   type DoneFor,
   type EmptySchema,
   ProtocolError,
+  ReconnectError,
   type RowFor,
   type RosNumbers,
   type SchemaShape,
@@ -15,7 +17,10 @@ import { NativeConnection, type NativeConnectionOptions } from '../transport/ind
 import { compileQuerySpec } from './query.js';
 
 export class RouterOS<S extends SchemaShape = EmptySchema> {
-  private readonly connection: NativeConnection;
+  private connection: NativeConnection;
+  private closedByUser = false;
+  private reconnectInProgress: Promise<void> | undefined;
+  private terminalFailure: Error | undefined;
 
   private constructor(connection: NativeConnection) {
     this.connection = connection;
@@ -24,28 +29,13 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
   static async connect<S extends SchemaShape = EmptySchema>(
     options: ConnectOptions,
   ): Promise<RouterOS<S>> {
-    validateConnectOptions(options);
-    const tls = options.tls ?? false;
-    const port = options.port ?? (tls === false ? 8728 : 8729);
-    const connectionOptions: NativeConnectionOptions = {
-      host: options.host,
-      port,
-      tls,
-      user: options.user,
-      password: options.password,
-      encoding: options.encoding ?? 'utf8',
-      timeoutMs: options.timeoutMs ?? 10_000,
-      connectTimeoutMs: options.connectTimeoutMs ?? 10_000,
-      keepAlive: options.keepAlive ?? true,
-      maxWordBytes: options.maxWordBytes ?? 32 * 1024 * 1024,
-      streamHighWaterMark: options.streamHighWaterMark ?? 1024,
-      cancelGraceMs: options.cancelGraceMs ?? 2_000,
-    };
-    const connection = await NativeConnection.connect(connectionOptions);
+    const connection = await NativeConnection.connect(normalizeConnectOptions(options));
     return new RouterOS<S>(connection);
   }
 
   get state(): ClientState {
+    if (this.reconnectInProgress !== undefined) return 'reconnecting';
+    if (this.terminalFailure !== undefined) return 'closed';
     return this.connection.state;
   }
 
@@ -62,6 +52,12 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: CommandOptions<RowFor<S, P>>,
   ): Promise<CommandResult<RowFor<S, P>, DoneFor<P>>> {
+    if (this.reconnectInProgress !== undefined) {
+      return Promise.reject(new ReconnectError('Reconnecting'));
+    }
+    if (this.terminalFailure !== undefined) {
+      return Promise.reject(this.terminalFailure);
+    }
     const words = buildWords(path, options as CommandOptions<string> | undefined);
     const signal = options?.signal;
     const timeoutMs = options?.timeoutMs;
@@ -88,6 +84,12 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: StreamCommandOptions<RowFor<S, P>>,
   ): AsyncIterable<RowFor<S, P>> {
+    if (this.reconnectInProgress !== undefined) {
+      return failedIterable<RowFor<S, P>>(new ReconnectError('Reconnecting'));
+    }
+    if (this.terminalFailure !== undefined) {
+      return failedIterable<RowFor<S, P>>(this.terminalFailure);
+    }
     const words = buildWords(path, options as CommandOptions<string> | undefined);
     const signal = options?.signal;
     const highWaterMark = options?.highWaterMark;
@@ -101,7 +103,45 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     }) as AsyncIterable<RowFor<S, P>>;
   }
 
+  async reconnect(options: ConnectOptions): Promise<void> {
+    if (this.closedByUser) throw new ClosedError();
+    if (this.reconnectInProgress !== undefined) {
+      throw new ReconnectError('Reconnect already in progress');
+    }
+    const normalized = normalizeConnectOptions(options);
+    const operation = this.performReconnect(normalized);
+    this.reconnectInProgress = operation;
+    try {
+      await operation;
+    } finally {
+      if (this.reconnectInProgress === operation) {
+        this.reconnectInProgress = undefined;
+      }
+    }
+  }
+
+  private async performReconnect(options: NativeConnectionOptions): Promise<void> {
+    try {
+      await this.connection.close(
+        new ReconnectError('Connection replaced by reconnect'),
+      );
+      if (this.closedByUser) throw new ClosedError();
+      const next = await NativeConnection.connect(options);
+      if (this.closedByUser) {
+        await next.close(new ClosedError());
+        throw new ClosedError();
+      }
+      this.connection = next;
+      this.terminalFailure = undefined;
+    } catch (error) {
+      const failure = error instanceof Error ? error : new Error(String(error));
+      this.terminalFailure = failure;
+      throw failure;
+    }
+  }
+
   close(): Promise<void> {
+    this.closedByUser = true;
     return this.connection.close();
   }
 
@@ -168,6 +208,34 @@ function appendAttribute(
     return;
   }
   words.push(`=${key}=${String(value)}`);
+}
+
+function normalizeConnectOptions(options: ConnectOptions): NativeConnectionOptions {
+  validateConnectOptions(options);
+  const tls = options.tls ?? false;
+  const port = options.port ?? (tls === false ? 8728 : 8729);
+  return {
+    host: options.host,
+    port,
+    tls,
+    user: options.user,
+    password: options.password,
+    encoding: options.encoding ?? 'utf8',
+    timeoutMs: options.timeoutMs ?? 10_000,
+    connectTimeoutMs: options.connectTimeoutMs ?? 10_000,
+    keepAlive: options.keepAlive ?? true,
+    maxWordBytes: options.maxWordBytes ?? 32 * 1024 * 1024,
+    streamHighWaterMark: options.streamHighWaterMark ?? 1024,
+    cancelGraceMs: options.cancelGraceMs ?? 2_000,
+  };
+}
+
+function failedIterable<T>(error: Error): AsyncIterable<T> {
+  return {
+    [Symbol.asyncIterator]: (): AsyncIterator<T> => ({
+      next: () => Promise.reject(error),
+    }),
+  };
 }
 
 function validateConnectOptions(options: ConnectOptions): void {

@@ -314,3 +314,16 @@ async function streamCatalogWinsADualDeclaredPath(): Promise<void> {
 }
 
 void streamCatalogWinsADualDeclaredPath;
+
+function reconnectRequiresOptions(client: RouterOS): void {
+  const result: Promise<void> = client.reconnect({
+    host: 'router.example.net',
+    user: 'admin',
+    password: 'secret',
+  });
+  void result;
+  // @ts-expect-error reconnect requires connection options
+  void client.reconnect();
+}
+
+void reconnectRequiresOptions;
