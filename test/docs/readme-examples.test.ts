@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { readdirSync, readFileSync } from 'node:fs';
-import test from 'node:test';
+import { test } from 'vite-plus/test';
 import { fileURLToPath } from 'node:url';
 
 /** README claims every TypeScript example on the page is a byte-identical copy

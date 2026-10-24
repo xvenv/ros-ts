@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import { test } from 'vite-plus/test';
 import { parseReply } from '../../../src/protocol/index.js';
 import { ProtocolError } from '../../../src/shared/index.js';
 

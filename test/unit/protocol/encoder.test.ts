@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import { test } from 'vite-plus/test';
 
 import { encodeSentence, encodeWord } from '../../../src/protocol/index.js';
 

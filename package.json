@@ -1,5 +1,5 @@
 {
-  "name": "mikrots",
+  "name": "ros-ts",
   "version": "0.1.0",
   "private": true,
   "description": "Type-safe RouterOS native API client for Node.js",
@@ -9,34 +9,28 @@
     "node": ">=24"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    }
+    ".": "./dist/index.mjs",
+    "./package.json": "./package.json"
   },
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE",
-    "CHANGELOG.md"
-  ],
+  "files": ["dist", "README.md", "LICENSE", "CHANGELOG.md"],
   "sideEffects": false,
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.types.json",
-    "test": "node --import ./scripts/resolve-ts.js --test \"test/unit/**/*.test.ts\" \"test/docs/**/*.test.ts\" \"test/integration/**/*.test.ts\"",
-    "test:coverage": "node --import ./scripts/resolve-ts.js --test --experimental-test-coverage \"test/unit/**/*.test.ts\" \"test/docs/**/*.test.ts\" \"test/integration/**/*.test.ts\"",
-    "test:integration": "node --import ./scripts/resolve-ts.js --test \"test/integration/**/*.test.ts\"",
-    "lint": "biome check src test scripts",
-    "check": "npm run typecheck && npm run lint && npm test",
-    "build": "tsc -p tsconfig.build.json",
+    "build": "vp pack",
+    "dev": "vp pack --watch",
+    "test": "vp test",
+    "test:integration": "vp test run test/integration",
+    "check": "vp check",
     "pack:check": "npm pack --dry-run",
-    "prepublishOnly": "npm run check && npm run build"
+    "prepare": "vp config",
+    "prepublishOnly": "vp run build"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.6.2",
     "@types/node": "^24.19.2",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0",
+    "vite-plus": "^1.4.0"
+  },
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.4.0"
   }
 }

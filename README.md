@@ -174,7 +174,7 @@ const links = await wireless.command('/interface/wireless/print', {
 // any key the schema does not list, on `proplist`, on `query`, on `command()`
 // and `stream()` alike (pinned in `types-test/client.ts`).
 // @ts-expect-error 'typ' is not a field of the declared row
-links.records[0]?.typ;
+void links.records[0]?.typ;
 // @ts-expect-error 'typ' is not a field of the declared row
 void wireless.command('/interface/wireless/print', { proplist: ['typ'] });
 ```

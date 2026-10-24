@@ -27,14 +27,14 @@ async function typedUsage(): Promise<void> {
   // so a declared field is reachable even when it was not projected.
   const idField: string = projected.records[0]?.['.id'] ?? '';
   // @ts-expect-error 'name' is not on the ip address record
-  projected.records[0]?.name;
+  void projected.records[0]?.name;
   // @ts-expect-error a proplist entry must be a field of the row
   await client.command('/ip/address/print', { proplist: ['nope'] });
 
   const full = await client.command('/ip/address/print');
   const interfaceName: string | undefined = full.records[0]?.interface;
   // @ts-expect-error unknown field on the catalog record
-  full.records[0]?.notAField;
+  void full.records[0]?.notAField;
 
   const added = await client.command('/ip/address/add', {
     attrs: { address: '10.0.0.1/24', interface: 'ether1' },
@@ -69,7 +69,7 @@ async function typedUsage(): Promise<void> {
     // event type: required fields are promised and unknown fields are rejected.
     const name: string = event.name;
     // @ts-expect-error 'notAField' is not on the interface event
-    event.notAField;
+    void event.notAField;
     void name;
   }
 

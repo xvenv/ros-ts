@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import test from 'node:test';
+import { onTestFinished, test } from 'vite-plus/test';
 import { RouterOS } from '../../../src/index.js';
 import { ProtocolError } from '../../../src/shared/index.js';
 import { FakeRouter } from '../../helpers/fake-router.js';
@@ -19,13 +19,13 @@ async function connect(router: FakeRouter): Promise<RouterOS> {
   return promise;
 }
 
-test('command builds proplist and typed query words', async (t) => {
+test('command builds proplist and typed query words', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -61,13 +61,13 @@ test('command builds proplist and typed query words', async (t) => {
   await router.close();
 });
 
-test('command and stream reject a non-string proplist entry', async (t) => {
+test('command and stream reject a non-string proplist entry', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -92,13 +92,13 @@ test('command and stream reject a non-string proplist entry', async (t) => {
   await router.close();
 });
 
-test('command and stream reject a proplist that is not an array', async (t) => {
+test('command and stream reject a proplist that is not an array', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -124,13 +124,13 @@ test('command and stream reject a proplist that is not an array', async (t) => {
   await router.close();
 });
 
-test('stream builds proplist and query words as projection words', async (t) => {
+test('stream builds proplist and query words as projection words', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -168,13 +168,13 @@ test('stream builds proplist and query words as projection words', async (t) => 
   await router.close();
 });
 
-test('add returns done attributes and set returns the empty envelope', async (t) => {
+test('add returns done attributes and set returns the empty envelope', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -222,13 +222,13 @@ test('add returns done attributes and set returns the empty envelope', async (t)
   await router.close();
 });
 
-test('command joins a list attribute into one comma-separated word', async (t) => {
+test('command joins a list attribute into one comma-separated word', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -251,13 +251,13 @@ test('command joins a list attribute into one comma-separated word', async (t) =
   await router.close();
 });
 
-test('command returns the lossless envelope', async (t) => {
+test('command returns the lossless envelope', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -326,13 +326,13 @@ test('rejects invalid connection options before opening a socket', async () => {
   );
 });
 
-test('close is idempotent and awaits the closed promise', async (t) => {
+test('close is idempotent and awaits the closed promise', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -344,13 +344,13 @@ test('close is idempotent and awaits the closed promise', async (t) => {
   await router.close();
 });
 
-test('command sends attribute words and returns the done envelope', async (t) => {
+test('command sends attribute words and returns the done envelope', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -372,13 +372,13 @@ test('command sends attribute words and returns the done envelope', async (t) =>
   assert.deepEqual(result.records, []);
 });
 
-test('command builds proplist and query words for an uncataloged path', async (t) => {
+test('command builds proplist and query words for an uncataloged path', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -403,13 +403,13 @@ test('command builds proplist and query words for an uncataloged path', async (t
   assert.deepEqual({ ...result.records[0] }, { name: 'laser', port: '1' });
 });
 
-test('command rejects an add reply that carries no ret', async (t) => {
+test('command rejects an add reply that carries no ret', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -426,13 +426,13 @@ test('command rejects an add reply that carries no ret', async (t) => {
   assert.equal(client.state, 'ready');
 });
 
-test('stream sends attrs plus projection words', async (t) => {
+test('stream sends attrs plus projection words', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -468,13 +468,13 @@ test('stream sends attrs plus projection words', async (t) => {
   await stopped;
 });
 
-test('command rejects an invalid timeoutMs before it reaches the timer', async (t) => {
+test('command rejects an invalid timeoutMs before it reaches the timer', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -500,13 +500,13 @@ test('command rejects an invalid timeoutMs before it reaches the timer', async (
   await promise;
 });
 
-test('stream rejects an invalid highWaterMark at call time', async (t) => {
+test('stream rejects an invalid highWaterMark at call time', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 
@@ -537,13 +537,13 @@ test('stream rejects an invalid highWaterMark at call time', async (t) => {
   await stopped;
 });
 
-test('an unchecked query key is forwarded verbatim to the router', async (t) => {
+test('an unchecked query key is forwarded verbatim to the router', async () => {
   const router = await FakeRouter.start();
-  t.after(async () => {
+  onTestFinished(async () => {
     await router.close().catch(() => undefined);
   });
   const client = await connect(router);
-  t.after(async () => {
+  onTestFinished(async () => {
     await client.close().catch(() => undefined);
   });
 

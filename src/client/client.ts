@@ -7,6 +7,7 @@ import {
   type EmptySchema,
   ProtocolError,
   type RowFor,
+  type RosNumbers,
   type SchemaShape,
   type StreamCommandOptions,
 } from '../shared/index.js';
@@ -162,7 +163,11 @@ function requireAddDone<Row, Done>(
   return result as CommandResult<Row, Done>;
 }
 
-function appendAttribute(words: string[], key: string, value: unknown): void {
+function appendAttribute(
+  words: string[],
+  key: string,
+  value: RosNumbers | number | undefined,
+): void {
   if (value === undefined) return;
   if (key === '' || key.startsWith('.') || key.includes('=')) {
     throw new TypeError(`Invalid attribute key: ${key}`);
