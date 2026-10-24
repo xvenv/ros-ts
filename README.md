@@ -333,10 +333,10 @@ Start the two routers with
 `docker compose -f test/integration/docker-compose.yaml up -d`. Router state is
 written under `.routeros-data/`, which is gitignored.
 
-The default run is read-only. The write subtest creates a
-`ros-ts-test-<uuid>` simple queue, checks a UTF-8 comment and rate update,
-and removes the queue in a `finally` block. Run it only against a test
-device, never production.
+The default run is read-only. The write subtests create a temporary user, a
+hotspot user, a static route, and a `ros-ts-test-<uuid>` simple queue, then
+remove them in `finally` blocks. Run them only against a test device, never
+production.
 
 ## License
 

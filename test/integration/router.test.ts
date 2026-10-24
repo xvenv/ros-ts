@@ -155,4 +155,181 @@ describe.skipIf(skip)('RouterOS integration', () => {
       }
     },
   );
+
+  it.skipIf(!writeEnabled)(
+    'creates, queries, updates, and removes a user',
+    async () => {
+      const name = `ros-ts-test-user-${randomUUID()}`;
+      const comment = 'created by ros-ts integration';
+      const updatedComment = 'updated by ros-ts integration';
+      let ret: string | undefined;
+
+      try {
+        const added = await client.command('/user/add', {
+          attrs: {
+            name,
+            password: `ros-ts-${randomUUID()}`,
+            group: 'read',
+            comment,
+          },
+        });
+        ret = added.done.ret;
+        assert.ok(ret);
+
+        const found = await client.command('/user/print', {
+          proplist: ['name', 'group', 'comment'],
+          query: (query) => query.eq('name', name),
+        });
+        assert.equal(found.records.length, 1);
+        assert.equal(found.records[0]?.group, 'read');
+        assert.equal(found.records[0]?.comment, comment);
+
+        await client.command('/user/set', {
+          attrs: { numbers: ret, comment: updatedComment },
+        });
+
+        const updated = await client.command('/user/print', {
+          proplist: ['comment'],
+          query: (query) => query.eq('name', name),
+        });
+        assert.equal(updated.records[0]?.comment, updatedComment);
+
+        await client.command('/user/remove', { attrs: { numbers: ret } });
+        ret = undefined;
+
+        const removed = await client.command('/user/print', {
+          proplist: ['name'],
+          query: (query) => query.eq('name', name),
+        });
+        assert.equal(removed.records.length, 0);
+      } finally {
+        if (ret !== undefined) {
+          await client
+            .command('/user/remove', { attrs: { numbers: ret } })
+            .catch(() => undefined);
+        }
+      }
+    },
+  );
+
+  it.skipIf(!writeEnabled)(
+    'creates, queries, updates, and removes a static route',
+    async () => {
+      const defaults = await client.command('/ip/route/print', {
+        proplist: ['gateway'],
+        query: (query) => query.eq('dst-address', '0.0.0.0/0'),
+      });
+      const gateway = defaults.records[0]?.gateway;
+      assert.ok(gateway, 'no default gateway to reuse');
+
+      const dst = '192.0.2.0/24';
+      const comment = 'created by ros-ts integration';
+      const updatedComment = 'updated by ros-ts integration';
+      let ret: string | undefined;
+
+      try {
+        const added = await client.command('/ip/route/add', {
+          attrs: { 'dst-address': dst, gateway, comment },
+        });
+        ret = added.done.ret;
+        assert.ok(ret);
+
+        const found = await client.command('/ip/route/print', {
+          proplist: ['dst-address', 'gateway', 'comment'],
+          query: (query) =>
+            query.and(query.eq('dst-address', dst), query.eq('comment', comment)),
+        });
+        assert.equal(found.records.length, 1);
+        assert.equal(found.records[0]?.gateway, gateway);
+
+        await client.command('/ip/route/set', {
+          attrs: { numbers: ret, comment: updatedComment },
+        });
+
+        const updated = await client.command('/ip/route/print', {
+          proplist: ['comment'],
+          query: (query) =>
+            query.and(
+              query.eq('dst-address', dst),
+              query.eq('comment', updatedComment),
+            ),
+        });
+        assert.equal(updated.records.length, 1);
+
+        await client.command('/ip/route/remove', { attrs: { numbers: ret } });
+        ret = undefined;
+
+        const removed = await client.command('/ip/route/print', {
+          proplist: ['dst-address'],
+          query: (query) => query.eq('dst-address', dst),
+        });
+        assert.equal(removed.records.length, 0);
+      } finally {
+        if (ret !== undefined) {
+          await client
+            .command('/ip/route/remove', { attrs: { numbers: ret } })
+            .catch(() => undefined);
+        }
+      }
+    },
+  );
+
+  it.skipIf(!writeEnabled)(
+    'creates, queries, updates, and removes a hotspot user',
+    async () => {
+      const name = `ros-ts-test-hotspot-${randomUUID()}`;
+      const comment = 'created by ros-ts integration';
+      const updatedComment = 'updated by ros-ts integration';
+      let ret: string | undefined;
+
+      try {
+        const added = await client.command('/ip/hotspot/user/add', {
+          attrs: {
+            name,
+            password: `ros-ts-${randomUUID()}`,
+            profile: 'default',
+            comment,
+          },
+        });
+        ret = added.done.ret;
+        assert.ok(ret);
+
+        const found = await client.command('/ip/hotspot/user/print', {
+          proplist: ['name', 'profile', 'comment', 'disabled'],
+          query: (query) => query.eq('name', name),
+        });
+        assert.equal(found.records.length, 1);
+        assert.equal(found.records[0]?.profile, 'default');
+        assert.equal(found.records[0]?.comment, comment);
+
+        await client.command('/ip/hotspot/user/set', {
+          attrs: { numbers: ret, comment: updatedComment },
+        });
+
+        const updated = await client.command('/ip/hotspot/user/print', {
+          proplist: ['comment'],
+          query: (query) =>
+            query.and(query.eq('name', name), query.eq('comment', updatedComment)),
+        });
+        assert.equal(updated.records.length, 1);
+
+        await client.command('/ip/hotspot/user/remove', {
+          attrs: { numbers: ret },
+        });
+        ret = undefined;
+
+        const removed = await client.command('/ip/hotspot/user/print', {
+          proplist: ['name'],
+          query: (query) => query.eq('name', name),
+        });
+        assert.equal(removed.records.length, 0);
+      } finally {
+        if (ret !== undefined) {
+          await client
+            .command('/ip/hotspot/user/remove', { attrs: { numbers: ret } })
+            .catch(() => undefined);
+        }
+      }
+    },
+  );
 });
