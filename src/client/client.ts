@@ -20,6 +20,7 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
   private connection: NativeConnection;
   private closedByUser = false;
   private reconnectInProgress: Promise<void> | undefined;
+  private reconnectAbort: AbortController | undefined;
   private terminalFailure: Error | undefined;
 
   private constructor(connection: NativeConnection) {
@@ -109,24 +110,32 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
       throw new ReconnectError('Reconnect already in progress');
     }
     const normalized = normalizeConnectOptions(options);
-    const operation = this.performReconnect(normalized);
+    const controller = new AbortController();
+    const operation = this.performReconnect(normalized, controller.signal);
     this.reconnectInProgress = operation;
+    this.reconnectAbort = controller;
     try {
       await operation;
     } finally {
       if (this.reconnectInProgress === operation) {
         this.reconnectInProgress = undefined;
       }
+      if (this.reconnectAbort === controller) {
+        this.reconnectAbort = undefined;
+      }
     }
   }
 
-  private async performReconnect(options: NativeConnectionOptions): Promise<void> {
+  private async performReconnect(
+    options: NativeConnectionOptions,
+    signal: AbortSignal,
+  ): Promise<void> {
     try {
       await this.connection.close(
         new ReconnectError('Connection replaced by reconnect'),
       );
       if (this.closedByUser) throw new ClosedError();
-      const next = await NativeConnection.connect(options);
+      const next = await NativeConnection.connect(options, signal);
       if (this.closedByUser) {
         await next.close(new ClosedError());
         throw new ClosedError();
@@ -140,9 +149,15 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     }
   }
 
-  close(): Promise<void> {
+  async close(): Promise<void> {
     this.closedByUser = true;
-    return this.connection.close();
+    this.reconnectAbort?.abort();
+    const reconnect = this.reconnectInProgress;
+    try {
+      await this.connection.close();
+    } finally {
+      if (reconnect !== undefined) await reconnect.catch(() => undefined);
+    }
   }
 
   [Symbol.asyncDispose](): Promise<void> {

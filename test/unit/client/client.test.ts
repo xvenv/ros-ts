@@ -1,7 +1,12 @@
 import assert from 'node:assert/strict';
 import { onTestFinished, test } from 'vite-plus/test';
 import { RouterOS } from '../../../src/index.js';
-import { ProtocolError, ReconnectError } from '../../../src/shared/index.js';
+import {
+  ClosedError,
+  LoginError,
+  ProtocolError,
+  ReconnectError,
+} from '../../../src/shared/index.js';
 import { FakeRouter } from '../../helpers/fake-router.js';
 
 function options(router: FakeRouter) {
@@ -699,4 +704,132 @@ test('invalid reconnect options leave the ready connection untouched', async () 
   const wire = await router.nextCommand();
   router.send(['!done', `.tag=${wire.tag}`]);
   await command;
+});
+
+test('reconnect rejects a pending stream with ReconnectError', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+  onTestFinished(async () => {
+    await client.close().catch(() => undefined);
+  });
+
+  const iterator = client.stream('/interface/listen')[Symbol.asyncIterator]();
+  const first = iterator.next();
+  const command = await router.nextCommand();
+  assert.ok(command.tag);
+  router.send(['!re', '=name=ether1', `.tag=${command.tag}`]);
+  const record = await first;
+  assert.equal(record.done, false);
+
+  const second = iterator.next();
+  const reconnect = client.reconnect(options(router));
+  await assert.rejects(second, ReconnectError);
+
+  await router.nextCommand();
+  router.send(['!done']);
+  await reconnect;
+});
+
+test('a second reconnect rejects while the first is running', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+  onTestFinished(async () => {
+    await client.close().catch(() => undefined);
+  });
+
+  const first = client.reconnect(options(router));
+  await assert.rejects(client.reconnect(options(router)), ReconnectError);
+
+  await router.nextCommand();
+  router.send(['!done']);
+  await first;
+});
+
+test('reconnect after close rejects with ClosedError', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+
+  await client.close();
+  await assert.rejects(client.reconnect(options(router)), ClosedError);
+});
+
+test('reconnect after a peer drop succeeds', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+  onTestFinished(async () => {
+    await client.close().catch(() => undefined);
+  });
+
+  router.destroyClient();
+  await client.closed;
+  assert.equal(client.state, 'closed');
+
+  const reconnect = client.reconnect(options(router));
+  await router.nextCommand();
+  router.send(['!done']);
+  await reconnect;
+  assert.equal(client.state, 'ready');
+});
+
+test('a failed reconnect is retryable', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+  onTestFinished(async () => {
+    await client.close().catch(() => undefined);
+  });
+
+  const failed = client.reconnect({
+    ...options(router),
+    password: 'wrong',
+  });
+  const badLogin = await router.nextCommand();
+  assert.deepEqual(badLogin.words, ['/login', '=name=admin', '=password=wrong']);
+  router.send(['!trap', '=message=invalid user name or password']);
+  await assert.rejects(failed, LoginError);
+  assert.equal(client.state, 'closed');
+  await assert.rejects(client.command('/system/identity/print'), LoginError);
+
+  const retry = client.reconnect(options(router));
+  await router.nextCommand();
+  router.send(['!done']);
+  await retry;
+  assert.equal(client.state, 'ready');
+
+  const command = client.command('/system/identity/print');
+  const wire = await router.nextCommand();
+  router.send(['!done', `.tag=${wire.tag}`]);
+  await command;
+});
+
+test('close during reconnect cancels the new attempt', async () => {
+  const router = await FakeRouter.start();
+  onTestFinished(async () => {
+    await router.close().catch(() => undefined);
+  });
+  const client = await connect(router);
+
+  const reconnect = client.reconnect(options(router));
+  const login = await router.nextCommand();
+  assert.deepEqual(login.words, ['/login', '=name=admin', '=password=secret']);
+
+  const close = client.close();
+  await assert.rejects(reconnect, ClosedError);
+  await close;
+  assert.equal(client.state, 'closed');
+  await assert.rejects(client.command('/system/identity/print'), ClosedError);
 });
