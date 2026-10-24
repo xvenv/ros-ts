@@ -1,0 +1,42 @@
+{
+  "name": "mikrots",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Type-safe RouterOS native API client for Node.js",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.types.json",
+    "test": "node --import ./scripts/resolve-ts.js --test",
+    "test:coverage": "node --import ./scripts/resolve-ts.js --test --experimental-test-coverage",
+    "test:integration": "node --import ./scripts/resolve-ts.js --test \"test/integration/**/*.test.ts\"",
+    "lint": "biome check src test types-test scripts",
+    "check": "npm run typecheck && npm run lint && npm test",
+    "build": "tsc -p tsconfig.build.json",
+    "pack:check": "npm pack --dry-run",
+    "prepublishOnly": "npm run check && npm run build"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.6.2",
+    "@types/node": "^24.19.2",
+    "typescript": "^7.0.2"
+  }
+}
