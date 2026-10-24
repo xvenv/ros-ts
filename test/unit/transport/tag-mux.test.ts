@@ -26,9 +26,7 @@ function reply(
   };
 }
 
-function createMux(
-  overrides: Partial<ConstructorParameters<typeof TagMux>[0]> = {},
-) {
+function createMux(overrides: Partial<ConstructorParameters<typeof TagMux>[0]> = {}) {
   const writes: string[][] = [];
   const cancels: string[] = [];
   const errors: ProtocolError[] = [];

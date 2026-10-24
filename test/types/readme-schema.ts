@@ -4,11 +4,7 @@
  * module specifier and the `import` lines). The `BOOKKEEPING` lines exist for
  * the compiler and linter only and are not part of any README block.
  */
-import type {
-  MutateCommand,
-  PrintCommand,
-  SchemaShape,
-} from '../../src/index.js';
+import type { MutateCommand, PrintCommand, SchemaShape } from '../../src/index.js';
 import { RouterOS } from '../../src/index.js';
 
 interface WirelessCatalog {

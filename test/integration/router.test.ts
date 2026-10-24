@@ -4,11 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, it } from 'vite-plus/test';
 
 import { RouterOS } from '../../src/index.js';
-import {
-  CancelledError,
-  TimeoutError,
-  TrapError,
-} from '../../src/shared/index.js';
+import { CancelledError, TimeoutError, TrapError } from '../../src/shared/index.js';
 
 const hostValue = process.env.ROS_HOST;
 const userValue = process.env.ROS_USER;
@@ -77,10 +73,7 @@ describe.skipIf(skip)('RouterOS integration', () => {
   });
 
   it('reports a trap for an invalid command', async () => {
-    await assert.rejects(
-      client.command('/definitely/not/a/command'),
-      TrapError,
-    );
+    await assert.rejects(client.command('/definitely/not/a/command'), TrapError);
   });
 
   it('times out a slow command and stays connected', async () => {

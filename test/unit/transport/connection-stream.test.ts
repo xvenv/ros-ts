@@ -28,38 +28,40 @@ async function connect(router: FakeRouter): Promise<NativeConnection> {
   return promise;
 }
 
-test('streams records and cancels on consumer break', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'streams records and cancels on consumer break',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  const iterator = connection
-    .stream(['/interface/listen'])
-    [Symbol.asyncIterator]();
+    const iterator = connection.stream(['/interface/listen'])[Symbol.asyncIterator]();
 
-  // The generator body, which writes the tagged command, only runs once
-  // next() is called; awaiting nextCommand() first would hang.
-  const pendingFirst = iterator.next();
-  const command = await router.nextCommand();
-  assert.ok(command.tag);
-  router.send(['!re', '=name=ether1', `.tag=${command.tag}`]);
+    // The generator body, which writes the tagged command, only runs once
+    // next() is called; awaiting nextCommand() first would hang.
+    const pendingFirst = iterator.next();
+    const command = await router.nextCommand();
+    assert.ok(command.tag);
+    router.send(['!re', '=name=ether1', `.tag=${command.tag}`]);
 
-  const first = await pendingFirst;
-  if (first.done !== false) assert.fail('stream ended before the first record');
-  // Reply records keep a null prototype; deepEqual compares prototypes, so
-  // copy the record into a plain object.
-  assert.deepEqual({ ...first.value }, { name: 'ether1' });
+    const first = await pendingFirst;
+    if (first.done !== false) assert.fail('stream ended before the first record');
+    // Reply records keep a null prototype; deepEqual compares prototypes, so
+    // copy the record into a plain object.
+    assert.deepEqual({ ...first.value }, { name: 'ether1' });
 
-  const stopped = iterator.return?.();
-  const cancel = await router.nextCommand();
-  assert.deepEqual(cancel.words, ['/cancel', `=tag=${command.tag}`]);
-  router.send(['!done', `.tag=${command.tag}`]);
-  await stopped;
+    const stopped = iterator.return?.();
+    const cancel = await router.nextCommand();
+    assert.deepEqual(cancel.words, ['/cancel', `=tag=${command.tag}`]);
+    router.send(['!done', `.tag=${command.tag}`]);
+    await stopped;
 
-  await connection.close();
-  await router.close();
-});
+    await connection.close();
+    await router.close();
+  },
+);
 
 test('a stream ends normally on !done', { timeout: 5000 }, async () => {
   const router = await FakeRouter.start();
@@ -85,24 +87,28 @@ test('a stream ends normally on !done', { timeout: 5000 }, async () => {
   await router.close();
 });
 
-test('partial frames across TCP chunks are decoded', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const promise = NativeConnection.connect(options(router.port));
+test(
+  'partial frames across TCP chunks are decoded',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const promise = NativeConnection.connect(options(router.port));
 
-  const login = await router.nextCommand();
-  assert.equal(login.words[0], '/login');
+    const login = await router.nextCommand();
+    assert.equal(login.words[0], '/login');
 
-  const frame = Buffer.concat([
-    Buffer.from([0x05]),
-    Buffer.from('!done', 'utf8'),
-    Buffer.from([0x00]),
-  ]);
-  router.sendChunks(frame, [1, 2, 3]);
+    const frame = Buffer.concat([
+      Buffer.from([0x05]),
+      Buffer.from('!done', 'utf8'),
+      Buffer.from([0x00]),
+    ]);
+    router.sendChunks(frame, [1, 2, 3]);
 
-  const connection = await promise;
-  assert.equal(connection.state, 'ready');
-  await connection.close();
-  await router.close();
-});
+    const connection = await promise;
+    assert.equal(connection.state, 'ready');
+    await connection.close();
+    await router.close();
+  },
+);

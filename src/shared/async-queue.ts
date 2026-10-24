@@ -83,10 +83,7 @@ export class AsyncQueue<T> implements AsyncIterable<T> {
     if (this.failed) return Promise.reject(this.error);
     if (this.values.length > 0) {
       const value = this.values.shift() as T;
-      if (
-        this.full &&
-        this.values.length <= Math.floor(this.highWaterMark / 2)
-      ) {
+      if (this.full && this.values.length <= Math.floor(this.highWaterMark / 2)) {
         this.full = false;
         this.onDrain?.();
       }

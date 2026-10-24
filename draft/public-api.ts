@@ -194,7 +194,8 @@ export interface StreamCommand<Item> {
 
 export type RowOf<D> = D extends PrintCommand<infer Row> ? Row : never;
 export type ArgsOf<D> = D extends MutateCommand<infer Args, unknown> ? Args : never;
-export type ResultOf<D> = D extends MutateCommand<object, infer Result> ? Result : never;
+export type ResultOf<D> =
+  D extends MutateCommand<object, infer Result> ? Result : never;
 export type ItemOf<D> = D extends StreamCommand<infer Item> ? Item : never;
 
 /**
@@ -211,11 +212,11 @@ export interface SchemaShape {
 export type CommandsOf<S extends SchemaShape> = S['commands'];
 export type StreamsOf<S extends SchemaShape> = S['streams'];
 
-export type CommandAt<S extends SchemaShape, P extends string> =
-  CommandsOf<S>[P & keyof CommandsOf<S>];
+export type CommandAt<S extends SchemaShape, P extends string> = CommandsOf<S>[P &
+  keyof CommandsOf<S>];
 
-export type StreamAt<S extends SchemaShape, P extends string> =
-  StreamsOf<S>[P & keyof StreamsOf<S>];
+export type StreamAt<S extends SchemaShape, P extends string> = StreamsOf<S>[P &
+  keyof StreamsOf<S>];
 
 export type PrintPath<S extends SchemaShape> = {
   [P in keyof CommandsOf<S>]: CommandsOf<S>[P] extends PrintCommand<unknown>
@@ -225,19 +226,14 @@ export type PrintPath<S extends SchemaShape> = {
   string;
 
 export type MutatePath<S extends SchemaShape> = {
-  [P in keyof CommandsOf<S>]: CommandsOf<S>[P] extends MutateCommand<
-    object,
-    unknown
-  >
+  [P in keyof CommandsOf<S>]: CommandsOf<S>[P] extends MutateCommand<object, unknown>
     ? P
     : never;
 }[keyof CommandsOf<S>] &
   string;
 
 export type StreamPath<S extends SchemaShape> = {
-  [P in keyof StreamsOf<S>]: StreamsOf<S>[P] extends StreamCommand<unknown>
-    ? P
-    : never;
+  [P in keyof StreamsOf<S>]: StreamsOf<S>[P] extends StreamCommand<unknown> ? P : never;
 }[keyof StreamsOf<S>] &
   string;
 
@@ -889,10 +885,7 @@ export declare class RouterOS<S extends SchemaShape = CoreSchema> {
   /** Resolves once the socket is fully closed, for any reason. */
   readonly closed: Promise<void>;
 
-  call<
-    P extends PrintPath<S>,
-    K extends keyof RowOf<CommandAt<S, P>> & string,
-  >(
+  call<P extends PrintPath<S>, K extends keyof RowOf<CommandAt<S, P>> & string>(
     path: P,
     options: NarrowPrintOptions<RowOf<CommandAt<S, P>>, K>,
   ): Promise<readonly Pick<RowOf<CommandAt<S, P>>, K>[]>;
@@ -916,10 +909,7 @@ export declare class RouterOS<S extends SchemaShape = CoreSchema> {
   ): AsyncIterable<ItemOf<StreamAt<S, P>>>;
 
   /** Lossless streaming escape hatch. */
-  streamRaw(
-    path: string,
-    options?: RawStreamOptions,
-  ): AsyncIterable<RosRecord>;
+  streamRaw(path: string, options?: RawStreamOptions): AsyncIterable<RosRecord>;
 
   /** Idempotent. Pending commands reject with {@link ClosedError}. */
   close(): Promise<void>;

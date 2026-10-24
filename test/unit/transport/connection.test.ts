@@ -108,96 +108,121 @@ test('routes interleaved replies by tag', async () => {
   await router.close();
 });
 
-test('rejects with ConnectionError when the port is closed', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const port = router.port;
-  await router.close();
+test(
+  'rejects with ConnectionError when the port is closed',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const port = router.port;
+    await router.close();
 
-  await assert.rejects(
-    NativeConnection.connect(options(port)),
-    ConnectionError,
-  );
-});
+    await assert.rejects(NativeConnection.connect(options(port)), ConnectionError);
+  },
+);
 
-test('rejects when login done and a protocol error arrive together', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const promise = NativeConnection.connect(options(router.port));
+test(
+  'rejects when login done and a protocol error arrive together',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const promise = NativeConnection.connect(options(router.port));
 
-  await router.nextCommand();
-  router.sendMany([['!done'], ['!re']]);
+    await router.nextCommand();
+    router.sendMany([['!done'], ['!re']]);
 
-  await assert.rejects(promise, ProtocolError);
-  await router.close();
-});
+    await assert.rejects(promise, ProtocolError);
+    await router.close();
+  },
+);
 
-test('later calls after a peer disconnect reject with ConnectionError', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'later calls after a peer disconnect reject with ConnectionError',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  router.destroyClient();
-  await connection.closed;
+    router.destroyClient();
+    await connection.closed;
 
-  await assert.rejects(connection.run(['/a/print']), ConnectionError);
-  await router.close();
-});
+    await assert.rejects(connection.run(['/a/print']), ConnectionError);
+    await router.close();
+  },
+);
 
-test('later calls after a user close reject with ClosedError', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'later calls after a user close reject with ClosedError',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  await connection.close();
-  await assert.rejects(connection.run(['/a/print']), ClosedError);
-  await router.close();
-});
+    await connection.close();
+    await assert.rejects(connection.run(['/a/print']), ClosedError);
+    await router.close();
+  },
+);
 
-test('rejects LoginError when the router traps the login', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connectionPromise = NativeConnection.connect(options(router.port));
+test(
+  'rejects LoginError when the router traps the login',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connectionPromise = NativeConnection.connect(options(router.port));
 
-  await router.nextCommand();
-  router.send(['!trap', '=message=invalid user name or password (6)']);
+    await router.nextCommand();
+    router.send(['!trap', '=message=invalid user name or password (6)']);
 
-  await assert.rejects(connectionPromise, LoginError);
-  await router.close();
-});
+    await assert.rejects(connectionPromise, LoginError);
+    await router.close();
+  },
+);
 
-test('rejects pending commands with FatalError on !fatal', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'rejects pending commands with FatalError on !fatal',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  const pending = connection.run(['/a/print']);
-  await router.nextCommand();
-  router.send(['!fatal', 'shutting down']);
+    const pending = connection.run(['/a/print']);
+    await router.nextCommand();
+    router.send(['!fatal', 'shutting down']);
 
-  await assert.rejects(pending, FatalError);
-  await connection.closed;
-  await router.close();
-});
+    await assert.rejects(pending, FatalError);
+    await connection.closed;
+    await router.close();
+  },
+);
 
-test('closes the connection on a reply for an unknown tag', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'closes the connection on a reply for an unknown tag',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  router.send(['!re', '=a=1', '.tag=99']);
+    router.send(['!re', '=a=1', '.tag=99']);
 
-  await connection.closed;
-  assert.equal(connection.state, 'closed');
-  await router.close();
-});
+    await connection.closed;
+    assert.equal(connection.state, 'closed');
+    await router.close();
+  },
+);
 
 test('times out a command and sends /cancel', { timeout: 5000 }, async () => {
   const router = await FakeRouter.start();
@@ -218,19 +243,23 @@ test('times out a command and sends /cancel', { timeout: 5000 }, async () => {
   await router.close();
 });
 
-test('close rejects pending commands with ClosedError', {
-  timeout: 5000,
-}, async () => {
-  const router = await FakeRouter.start();
-  const connection = await connect(router);
+test(
+  'close rejects pending commands with ClosedError',
+  {
+    timeout: 5000,
+  },
+  async () => {
+    const router = await FakeRouter.start();
+    const connection = await connect(router);
 
-  const pending = connection.run(['/a/print']);
-  await router.nextCommand();
-  // Observe the rejection before close() settles it; a handler attached after
-  // the close would see an unhandled-rejection error first.
-  const rejected = assert.rejects(pending, ClosedError);
-  await connection.close();
+    const pending = connection.run(['/a/print']);
+    await router.nextCommand();
+    // Observe the rejection before close() settles it; a handler attached after
+    // the close would see an unhandled-rejection error first.
+    const rejected = assert.rejects(pending, ClosedError);
+    await connection.close();
 
-  await rejected;
-  await router.close();
-});
+    await rejected;
+    await router.close();
+  },
+);

@@ -1,10 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'vite-plus/test';
 
-import {
-  type WritableSocket,
-  WriteQueue,
-} from '../../../src/transport/index.js';
+import { type WritableSocket, WriteQueue } from '../../../src/transport/index.js';
 
 class FakeSocket implements WritableSocket {
   readonly writes: string[] = [];
@@ -127,8 +124,7 @@ test('fail rejects a write already waiting for drain', async () => {
   const outcome = await Promise.race([
     pending.then(
       () => 'resolved',
-      (reason: unknown) =>
-        reason instanceof Error ? reason.message : 'rejected',
+      (reason: unknown) => (reason instanceof Error ? reason.message : 'rejected'),
     ),
     new Promise<string>((resolve) => {
       setImmediate(() => resolve('still pending'));

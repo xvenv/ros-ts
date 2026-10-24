@@ -1,9 +1,6 @@
 import { createServer, type Server, type Socket } from 'node:net';
 
-import {
-  decodeSentencesIndep,
-  encodeSentenceIndep,
-} from './independent-codec.js';
+import { decodeSentencesIndep, encodeSentenceIndep } from './independent-codec.js';
 
 export interface FakeCommand {
   readonly words: readonly string[];
@@ -67,9 +64,7 @@ export class FakeRouter {
   sendMany(sentences: readonly (readonly string[])[]): void {
     const socket = this.lastSocket;
     if (socket === undefined) throw new Error('No client connected');
-    socket.write(
-      Buffer.concat(sentences.map((words) => encodeSentenceIndep(words))),
-    );
+    socket.write(Buffer.concat(sentences.map((words) => encodeSentenceIndep(words))));
   }
 
   destroyClient(): void {

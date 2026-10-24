@@ -236,11 +236,7 @@ test('command joins a list attribute into one comma-separated word', async () =>
     attrs: { numbers: ['*1', '*2'] },
   });
   const command = await router.nextCommand();
-  assert.deepEqual(command.words, [
-    '/queue/simple/set',
-    '=numbers=*1,*2',
-    '.tag=1',
-  ]);
+  assert.deepEqual(command.words, ['/queue/simple/set', '=numbers=*1,*2', '.tag=1']);
   assert.ok(command.tag);
   router.send(['!done', `.tag=${command.tag}`]);
   const result = await promise;
@@ -384,8 +380,7 @@ test('command builds proplist and query words for an uncataloged path', async ()
 
   const promise = client.command('/interface/printer/print', {
     proplist: ['name', 'port'],
-    query: (query) =>
-      query.and(query.eq('name', 'laser'), query.absent('comment')),
+    query: (query) => query.and(query.eq('name', 'laser'), query.absent('comment')),
   });
   const command = await router.nextCommand();
   assert.deepEqual(command.words, [
@@ -553,11 +548,7 @@ test('an unchecked query key is forwarded verbatim to the router', async () => {
     query: (query) => query.eq('typ', 'ether1'),
   });
   const command = await router.nextCommand();
-  assert.deepEqual(command.words, [
-    '/ip/address/print',
-    '?typ=ether1',
-    '.tag=1',
-  ]);
+  assert.deepEqual(command.words, ['/ip/address/print', '?typ=ether1', '.tag=1']);
   assert.ok(command.tag);
   router.send(['!re', '=address=10.0.0.1/24', `.tag=${command.tag}`]);
   router.send(['!done', `.tag=${command.tag}`]);

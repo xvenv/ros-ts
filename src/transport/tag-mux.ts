@@ -120,9 +120,7 @@ export class TagMux {
       if (this.hasCancelling()) {
         return;
       }
-      this.options.onProtocolError(
-        new ProtocolError('Untagged reply after login'),
-      );
+      this.options.onProtocolError(new ProtocolError('Untagged reply after login'));
       return;
     }
 
@@ -335,11 +333,7 @@ export class TagMux {
     this.detachAbort(pending);
 
     if (pending.trap !== undefined) {
-      const error = new TrapError(
-        pending.trap.category,
-        pending.trap.message,
-        done,
-      );
+      const error = new TrapError(pending.trap.category, pending.trap.message, done);
       if (pending.queue !== undefined) pending.queue.fail(error);
       else pending.reject?.(error);
       return;

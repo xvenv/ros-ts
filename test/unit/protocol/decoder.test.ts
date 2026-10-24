@@ -44,9 +44,7 @@ test('decodes the same frame at every split position', () => {
 test('decodes one byte at a time', () => {
   const frame = encodeSentence(['!re', '=comment=café 日本語']);
   const sizes = Array.from({ length: frame.length }, () => 1);
-  assert.deepEqual(decodeInChunks(frame, sizes), [
-    ['!re', '=comment=café 日本語'],
-  ]);
+  assert.deepEqual(decodeInChunks(frame, sizes), [['!re', '=comment=café 日本語']]);
 });
 
 test('keeps a partial word buffered', () => {
@@ -115,10 +113,7 @@ test('seeded random splits produce identical sentences', () => {
     encodeSentence(['!re', '=interface=ether1', '=comment=café 日本語']),
     encodeSentence(['!done']),
   ]);
-  const expected = [
-    ['!re', '=interface=ether1', '=comment=café 日本語'],
-    ['!done'],
-  ];
+  const expected = [['!re', '=interface=ether1', '=comment=café 日本語'], ['!done']];
   let seed = 0x12345678;
   const random = (): number => {
     seed = (seed * 1664525 + 1013904223) >>> 0;

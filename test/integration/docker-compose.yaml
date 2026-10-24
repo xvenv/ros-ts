@@ -9,12 +9,12 @@ services:
       - /dev/net/tun
       - /dev/kvm # remove this line on Apple Silicon (no KVM)
     ports:
-      - "2201:22" # SSH
-      - "2301:23" # Telnet
-      - "8201:80" # WebFig
-      - "8728:8728" # API
-      - "8729:8729" # API-SSL
-      - "8291:8291" # Winbox
+      - '2201:22' # SSH
+      - '2301:23' # Telnet
+      - '8201:80' # WebFig
+      - '8728:8728' # API
+      - '8729:8729' # API-SSL
+      - '8291:8291' # Winbox
     volumes:
       - ../../.routeros-data/v6:/data
     networks:
@@ -31,12 +31,12 @@ services:
       - /dev/net/tun
       - /dev/kvm # remove this line on Apple Silicon (no KVM)
     ports:
-      - "2202:22" # SSH
-      - "2302:23" # Telnet
-      - "8202:80" # WebFig
-      - "9728:8728" # API
-      - "9729:8729" # API-SSL
-      - "9291:8291" # Winbox
+      - '2202:22' # SSH
+      - '2302:23' # Telnet
+      - '8202:80' # WebFig
+      - '9728:8728' # API
+      - '9729:8729' # API-SSL
+      - '9291:8291' # Winbox
     volumes:
       - ../../.routeros-data/v7:/data
     networks:

@@ -265,7 +265,7 @@ depends on.
   release.
 - Paths a schema does not declare stay open: their row is the lossless
   `RosRecord`, so any key you name reads `string | undefined`. Inside a path you
-  *did* declare, a field its row omits is not reachable — declare the field, or
+  _did_ declare, a field its row omits is not reachable — declare the field, or
   leave that path out of the schema.
 
 ## Tests
@@ -291,15 +291,15 @@ ROS_HOST=router.example.net ROS_USER=admin ROS_PASSWORD=secret \
   npm run test:integration
 ```
 
-| Variable | Meaning |
-|---|---|
-| `ROS_HOST` | Router address, required to run |
-| `ROS_PORT` | API port; default 8728, or 8729 with TLS |
-| `ROS_USER` | Login user, required to run |
-| `ROS_PASSWORD` | Login password; defaults to empty |
-| `ROS_TLS` | `1` enables TLS |
-| `ROS_TLS_INSECURE` | `1` sets `rejectUnauthorized: false`; test devices only |
-| `ROS_TEST_WRITE` | `1` enables the write subtest; dedicated test devices only |
+| Variable           | Meaning                                                    |
+| ------------------ | ---------------------------------------------------------- |
+| `ROS_HOST`         | Router address, required to run                            |
+| `ROS_PORT`         | API port; default 8728, or 8729 with TLS                   |
+| `ROS_USER`         | Login user, required to run                                |
+| `ROS_PASSWORD`     | Login password; defaults to empty                          |
+| `ROS_TLS`          | `1` enables TLS                                            |
+| `ROS_TLS_INSECURE` | `1` sets `rejectUnauthorized: false`; test devices only    |
+| `ROS_TEST_WRITE`   | `1` enables the write subtest; dedicated test devices only |
 
 The default run is read-only. The write subtest creates a
 `mikrots-test-<uuid>` simple queue, checks a UTF-8 comment and rate update,

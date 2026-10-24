@@ -6,11 +6,7 @@ import type {
   StreamCommand,
 } from '../../src/index.js';
 import { RouterOS } from '../../src/index.js';
-import type {
-  CoreSchema,
-  CoreStreams,
-  IpAddressRecord,
-} from './schema-example.js';
+import type { CoreSchema, CoreStreams, IpAddressRecord } from './schema-example.js';
 
 async function typedUsage(): Promise<void> {
   await using client = await RouterOS.connect<CoreSchema>({

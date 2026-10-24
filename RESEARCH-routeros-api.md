@@ -17,16 +17,16 @@ hand-typed menus, and no guessed APIs.
 
 ## 2. RouterOS exposes two programmatic interfaces
 
-| | **Native API** | **REST API** |
-|---|---|---|
-| Transport | Raw TCP, proprietary binary framing | HTTP/1.1 + JSON |
-| Ports | `8728` plain, `8729` TLS (API-SSL) | `443` (www-ssl) / `80` (www, since v7.9) |
-| Available | RouterOS 3.x+ | **v7.1beta4+** |
-| Auth | `/login` sentence, password in clear text | HTTP Basic |
-| Shape | sentences/words, `!re`/`!done`/`!trap` | JSON list/object per HTTP method |
-| Concurrency | Yes — `.tag=` multiplexing on one socket | One HTTP request per call |
-| Streaming | Yes — `listen` never terminates | No; must use `once` |
-| Cost | ~200 LOC codec | stdlib `fetch` |
+|             | **Native API**                            | **REST API**                             |
+| ----------- | ----------------------------------------- | ---------------------------------------- |
+| Transport   | Raw TCP, proprietary binary framing       | HTTP/1.1 + JSON                          |
+| Ports       | `8728` plain, `8729` TLS (API-SSL)        | `443` (www-ssl) / `80` (www, since v7.9) |
+| Available   | RouterOS 3.x+                             | **v7.1beta4+**                           |
+| Auth        | `/login` sentence, password in clear text | HTTP Basic                               |
+| Shape       | sentences/words, `!re`/`!done`/`!trap`    | JSON list/object per HTTP method         |
+| Concurrency | Yes — `.tag=` multiplexing on one socket  | One HTTP request per call                |
+| Streaming   | Yes — `listen` never terminates           | No; must use `once`                      |
+| Cost        | ~200 LOC codec                            | stdlib `fetch`                           |
 
 Verified: help.mikrotik.com/docs/spaces/ROS/pages/47579160/API and .../47579162/REST+API;
 manual.mikrotik.com/docs/developer-guides/rest-api/ (v7.26).
@@ -50,13 +50,13 @@ API command" (manual.mikrotik.com/docs/developer-guides/rest-api/, Verified).
 
 ### 3.1 Word length encoding
 
-| Length range | Bytes | First-byte pattern |
-|---|---|---|
-| `0 <= len <= 0x7F` | 1 | `len` (lowest byte) |
-| `0x80 <= len <= 0x3FFF` | 2 | `len \| 0x8000`, two lower bytes |
-| `0x4000 <= len <= 0x1FFFFF` | 3 | `len \| 0xC00000`, three lower bytes |
-| `0x200000 <= len <= 0xFFFFFFF` | 4 | `len \| 0xE0000000` |
-| `len >= 0x10000000` | 5 | `0xF0` then `len` as four bytes |
+| Length range                   | Bytes | First-byte pattern                   |
+| ------------------------------ | ----- | ------------------------------------ |
+| `0 <= len <= 0x7F`             | 1     | `len` (lowest byte)                  |
+| `0x80 <= len <= 0x3FFF`        | 2     | `len \| 0x8000`, two lower bytes     |
+| `0x4000 <= len <= 0x1FFFFF`    | 3     | `len \| 0xC00000`, three lower bytes |
+| `0x200000 <= len <= 0xFFFFFFF` | 4     | `len \| 0xE0000000`                  |
+| `len >= 0x10000000`            | 5     | `0xF0` then `len` as four bytes      |
 
 - Length is a **byte count**, network (big-endian) order.
 - Max encodable length is `0x7FFFFFFFFF`; only four-byte length is actually supported.
@@ -69,28 +69,29 @@ API command" (manual.mikrotik.com/docs/developer-guides/rest-api/, Verified).
 A sentence is a sequence of words terminated by a **zero-length word** (`0x00`). The first
 word must be the command. Word kinds are distinguished by their content prefix:
 
-| Prefix | Kind | Example |
-|---|---|---|
-| `/` | command word | `/ip/address/add` |
-| `=` | attribute word | `=address=10.0.0.1`, `=disabled=` (no value) |
-| `.` | API attribute word | `.tag=2` (only `tag` today) |
-| `?` | query word | `?type=ether` |
-| `!` | reply word | `!re`, `!done`, `!trap` |
+| Prefix | Kind               | Example                                      |
+| ------ | ------------------ | -------------------------------------------- |
+| `/`    | command word       | `/ip/address/add`                            |
+| `=`    | attribute word     | `=address=10.0.0.1`, `=disabled=` (no value) |
+| `.`    | API attribute word | `.tag=2` (only `tag` today)                  |
+| `?`    | query word         | `?type=ether`                                |
+| `!`    | reply word         | `!re`, `!done`, `!trap`                      |
 
 Notes:
+
 - Attribute order must not be relied on; `.proplist` changes which/many are returned.
 - Empty sentences are router-ignored. A sentence is processed only on the zero-length word.
 - There is a limit on number/size of sentences a client may send **before** login.
 
 ### 3.3 Reply words
 
-| Word | Meaning |
-|---|---|
-| `!re` | a data record |
-| `!done` | **always** the last reply to a given command |
-| `!trap` | error; carries `=message=` and often `=category=` |
+| Word     | Meaning                                                       |
+| -------- | ------------------------------------------------------------- |
+| `!re`    | a data record                                                 |
+| `!done`  | **always** the last reply to a given command                  |
+| `!trap`  | error; carries `=message=` and often `=category=`             |
 | `!empty` | command succeeded with no data (introduced **RouterOS 7.18**) |
-| `!fatal` | connection is being closed; carries a reason |
+| `!fatal` | connection is being closed; carries a reason                  |
 
 `!trap` `=category=` values: `0` missing item/command, `1` argument value failure,
 `2` execution interrupted, `3` scripting failure, `4` general failure, `5` API failure,
@@ -132,14 +133,14 @@ stopped with `/cancel`.
 Evaluated left-to-right against a stack of booleans that starts infinite-`true`; if any
 `false` remains at the end, the item is filtered out.
 
-| Query | Effect |
-|---|---|
-| `?name` | true if property `name` has a value |
-| `?-name` | true if property `name` has **no** value |
-| `?name=x` / `?=name=x` | true if `name == x` |
-| `?<name=x` | true if `name < x` |
-| `?>name=x` | true if `name > x` |
-| `?#ops` | stack machine over the booleans |
+| Query                  | Effect                                   |
+| ---------------------- | ---------------------------------------- |
+| `?name`                | true if property `name` has a value      |
+| `?-name`               | true if property `name` has **no** value |
+| `?name=x` / `?=name=x` | true if `name == x`                      |
+| `?<name=x`             | true if `name < x`                       |
+| `?>name=x`             | true if `name > x`                       |
+| `?#ops`                | stack machine over the booleans          |
 
 `?#ops` operations, evaluated left to right: digit run = stack index (top is 0); an index
 followed by a char pushes a copy; index at end replaces all with that value; `!` negates top;
@@ -183,13 +184,13 @@ Properties whose names end in `.oid` return SNMP OIDs when requested via `.propl
 
 ### JavaScript / TypeScript native-API clients
 
-| Repo / npm | Stars | Language | Last push | Types? | Note |
-|---|---|---|---|---|---|
-| `aluisiora/node-routeros` (npm `routeros` 1.6.12) | 112 | JS | 2021-01-18 | `types: ./dist/index` | **ARCHIVED**. Most-starred JS client. |
-| `aluisiora/routeros-client` | 78 | JS | 2021-01-18 | — | **ARCHIVED**. Abstraction over node-routeros. |
-| `renomureza/routeros-node` | 17 | TS | 2022-07-29 | — | Stale. |
-| `sparrow-code/ros-client` (npm `ros-client` 1.1.2) | 9 | TS | 2026-10-06 | **no `types` field** | Active-ish; 8728 + 8729. |
-| `go-routeros/routeros` | 275 | Go | 2025-02-16 | n/a | **Linked from MikroTik's own docs** as a reference impl. MIT. |
+| Repo / npm                                         | Stars | Language | Last push  | Types?                | Note                                                          |
+| -------------------------------------------------- | ----- | -------- | ---------- | --------------------- | ------------------------------------------------------------- |
+| `aluisiora/node-routeros` (npm `routeros` 1.6.12)  | 112   | JS       | 2021-01-18 | `types: ./dist/index` | **ARCHIVED**. Most-starred JS client.                         |
+| `aluisiora/routeros-client`                        | 78    | JS       | 2021-01-18 | —                     | **ARCHIVED**. Abstraction over node-routeros.                 |
+| `renomureza/routeros-node`                         | 17    | TS       | 2022-07-29 | —                     | Stale.                                                        |
+| `sparrow-code/ros-client` (npm `ros-client` 1.1.2) | 9     | TS       | 2026-10-06 | **no `types` field**  | Active-ish; 8728 + 8729.                                      |
+| `go-routeros/routeros`                             | 275   | Go       | 2025-02-16 | n/a                   | **Linked from MikroTik's own docs** as a reference impl. MIT. |
 
 npm registry, exact versions: `routeros` 1.6.12 (2025-03-07), `node-routeros` 1.6.9
 (2021-01-18), `routeros-client` 1.1.2 (2021-01-18), `ros-client` 1.1.2 (2025-06-13),
@@ -198,12 +199,12 @@ except `routeros` declares a `types` field.
 
 ### Tooling that matters for the type layer
 
-| Repo | Stars | What it gives us |
-|---|---|---|
-| `tikoci/restraml` | 73 | **Auto-generated schemas per RouterOS version**, built by GitHub Actions from live `/console/inspect`. Publishes `inspect.json` (1.0 MB), `deep-inspect.json` (5.2 MB), `openapi.json` (14 MB), `schema.raml` (7 MB). Versions 7.10.2 → 7.24.5. |
-| `tikoci/rosetta` | 50 | RouterOS commands/docs/changelogs in SQLite-as-RAG, sourced from MikroTik. |
-| `tikoci/centrs` | 5 | Bun/TS multi-protocol client. Explicitly a "friendly conduit, **not** a high-level configuration abstraction" — "you still speak RouterOS". |
-| `AliKarami/MikroMCP` | 79 | MCP server for RouterOS + SwOS. |
+| Repo                 | Stars | What it gives us                                                                                                                                                                                                                                |
+| -------------------- | ----- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tikoci/restraml`    | 73    | **Auto-generated schemas per RouterOS version**, built by GitHub Actions from live `/console/inspect`. Publishes `inspect.json` (1.0 MB), `deep-inspect.json` (5.2 MB), `openapi.json` (14 MB), `schema.raml` (7 MB). Versions 7.10.2 → 7.24.5. |
+| `tikoci/rosetta`     | 50    | RouterOS commands/docs/changelogs in SQLite-as-RAG, sourced from MikroTik.                                                                                                                                                                      |
+| `tikoci/centrs`      | 5     | Bun/TS multi-protocol client. Explicitly a "friendly conduit, **not** a high-level configuration abstraction" — "you still speak RouterOS".                                                                                                     |
+| `AliKarami/MikroMCP` | 79    | MCP server for RouterOS + SwOS.                                                                                                                                                                                                                 |
 
 ### The gap
 
@@ -230,15 +231,17 @@ a real router by CI. Structure (Verified — downloaded 7.24.5, 1,052,699 bytes)
 Verified sample — `/ip/address/add`:
 
 ```json
-{ "_type": "cmd",
-  "address":   { "_type": "arg", "desc": "A.B.C.D    (IP address)" },
+{
+  "_type": "cmd",
+  "address": { "_type": "arg", "desc": "A.B.C.D    (IP address)" },
   "broadcast": { "_type": "arg", "desc": "A.B.C.D    (IP address)" },
-  "comment":   { "_type": "arg", "desc": "string value" },
+  "comment": { "_type": "arg", "desc": "string value" },
   "copy-from": { "_type": "arg" },
-  "disabled":  { "_type": "arg" },
+  "disabled": { "_type": "arg" },
   "interface": { "_type": "arg" },
-  "netmask":   { "_type": "arg", "desc": "A.B.C.D    (IP address)" },
-  "network":   { "_type": "arg", "desc": "A.B.C.D    (IP address)" } }
+  "netmask": { "_type": "arg", "desc": "A.B.C.D    (IP address)" },
+  "network": { "_type": "arg", "desc": "A.B.C.D    (IP address)" }
+}
 ```
 
 **This is the type-generation source.** It removes the entire class of "hand-typed 900
@@ -270,6 +273,7 @@ official examples above. This is the part that must never be `any`.
 ### Layer 2 — connection
 
 `net.Socket` / `tls.connect`. Responsibilities:
+
 - login handshake (v6.43+ plaintext), with the pre-6.43 path deliberately unsupported.
 - sentence framing off a growing buffer (TCP has no message boundaries).
 - `.tag=` multiplexing: `Map<tag, Pending>`; a reply routes by tag.

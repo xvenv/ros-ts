@@ -86,13 +86,9 @@ function buildTree(builder: QueryBuilderImpl<Key>, tree: Tree): QueryExpr {
     case 'not':
       return builder.not(buildTree(builder, tree.child));
     case 'and':
-      return builder.and(
-        ...tree.children.map((child) => buildTree(builder, child)),
-      );
+      return builder.and(...tree.children.map((child) => buildTree(builder, child)));
     case 'or':
-      return builder.or(
-        ...tree.children.map((child) => buildTree(builder, child)),
-      );
+      return builder.or(...tree.children.map((child) => buildTree(builder, child)));
     default:
       throw new Error('unknown tree');
   }
@@ -119,10 +115,7 @@ function evaluateTree(tree: Tree, record: SampleRecord): boolean {
   }
 }
 
-function evaluateWords(
-  words: readonly string[],
-  record: SampleRecord,
-): boolean {
+function evaluateWords(words: readonly string[], record: SampleRecord): boolean {
   const stack: boolean[] = [];
 
   for (const word of words) {

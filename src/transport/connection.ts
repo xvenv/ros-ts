@@ -93,9 +93,7 @@ export class NativeConnection {
     this.socket.on('close', () => this.onSocketClose());
   }
 
-  static async connect(
-    options: NativeConnectionOptions,
-  ): Promise<NativeConnection> {
+  static async connect(options: NativeConnectionOptions): Promise<NativeConnection> {
     const socket =
       options.tls === false
         ? netConnect({ host: options.host, port: options.port })
@@ -187,11 +185,7 @@ export class NativeConnection {
       });
 
       const password = this.password ?? '';
-      const words = [
-        '/login',
-        `=name=${this.options.user}`,
-        `=password=${password}`,
-      ];
+      const words = ['/login', `=name=${this.options.user}`, `=password=${password}`];
       this.password = undefined;
       await this.writeQueue.write(this.encode(words));
       await Promise.race([login, timeout]);

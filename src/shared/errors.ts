@@ -11,11 +11,7 @@ export type RouterOSErrorCode =
 export class RouterOSError extends Error {
   readonly code: RouterOSErrorCode;
 
-  constructor(
-    code: RouterOSErrorCode,
-    message: string,
-    options?: ErrorOptions,
-  ) {
+  constructor(code: RouterOSErrorCode, message: string, options?: ErrorOptions) {
     super(message, options);
     this.name = new.target.name;
     this.code = code;

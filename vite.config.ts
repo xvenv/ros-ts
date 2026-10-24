@@ -5,14 +5,17 @@ const integration = Boolean(process.env.ROS_HOST);
 const layer = (files: string[], group: string[], message: string) => ({
   files,
   rules: {
-    'no-restricted-imports': [
+    'no-restricted-imports': ['error', { patterns: [{ group, message }] }] as [
       'error',
-      { patterns: [{ group, message }] },
-    ] as ['error', { patterns: { group: string[]; message: string }[] }],
+      { patterns: { group: string[]; message: string }[] },
+    ],
   },
 });
 
 export default defineConfig({
+  staged: {
+    '*': 'vp check --fix',
+  },
   pack: {
     dts: { generator: 'tsgo' },
     exports: true,

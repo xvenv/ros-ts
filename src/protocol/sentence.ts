@@ -25,9 +25,7 @@ export function parseReply(words: readonly string[]): ParsedReply {
     throw new ProtocolError('Empty reply sentence');
   }
   // Own keys only: inherited names such as 'constructor' are not reply words.
-  const kind = Object.hasOwn(REPLY_WORDS, first)
-    ? REPLY_WORDS[first]
-    : undefined;
+  const kind = Object.hasOwn(REPLY_WORDS, first) ? REPLY_WORDS[first] : undefined;
   if (kind === undefined) {
     throw new ProtocolError(`Unknown reply word ${first}`);
   }
@@ -62,8 +60,7 @@ export function parseReply(words: readonly string[]): ParsedReply {
       const separator = body.indexOf('=');
       const key = separator < 0 ? body : body.slice(0, separator);
       const value = separator < 0 ? '' : body.slice(separator + 1);
-      if (key === '')
-        throw new ProtocolError('API attribute with an empty key');
+      if (key === '') throw new ProtocolError('API attribute with an empty key');
       apiAttributes[key] = value;
       if (key === 'tag') {
         tag = value === '' ? undefined : value;

@@ -91,8 +91,7 @@ export interface StreamCommand<Item> {
 }
 
 export type RowOf<D> = D extends PrintCommand<infer Row> ? Row : never;
-export type ArgsOf<D> =
-  D extends MutateCommand<infer Args, unknown> ? Args : never;
+export type ArgsOf<D> = D extends MutateCommand<infer Args, unknown> ? Args : never;
 export type ResultOf<D> =
   D extends MutateCommand<object, infer Result> ? Result : never;
 export type ItemOf<D> = D extends StreamCommand<infer Item> ? Item : never;
@@ -118,10 +117,8 @@ export interface EmptySchema extends SchemaShape {
 export type CommandsOf<S extends SchemaShape> = S['commands'];
 export type StreamsOf<S extends SchemaShape> = S['streams'];
 
-export type CommandAt<
-  S extends SchemaShape,
-  P extends string,
-> = CommandsOf<S>[P & keyof CommandsOf<S>];
+export type CommandAt<S extends SchemaShape, P extends string> = CommandsOf<S>[P &
+  keyof CommandsOf<S>];
 
 export type StreamAt<S extends SchemaShape, P extends string> = StreamsOf<S>[P &
   keyof StreamsOf<S>];
@@ -134,19 +131,14 @@ export type PrintPath<S extends SchemaShape> = {
   string;
 
 export type MutatePath<S extends SchemaShape> = {
-  [P in keyof CommandsOf<S>]: CommandsOf<S>[P] extends MutateCommand<
-    object,
-    unknown
-  >
+  [P in keyof CommandsOf<S>]: CommandsOf<S>[P] extends MutateCommand<object, unknown>
     ? P
     : never;
 }[keyof CommandsOf<S>] &
   string;
 
 export type StreamPath<S extends SchemaShape> = {
-  [P in keyof StreamsOf<S>]: StreamsOf<S>[P] extends StreamCommand<unknown>
-    ? P
-    : never;
+  [P in keyof StreamsOf<S>]: StreamsOf<S>[P] extends StreamCommand<unknown> ? P : never;
 }[keyof StreamsOf<S>] &
   string;
 
@@ -156,9 +148,7 @@ export interface AddDone {
 }
 
 /** `add` replies are typed; every other verb keeps the lossless record shape. */
-export type DoneFor<P extends string> = P extends `${string}/add`
-  ? AddDone
-  : RosRecord;
+export type DoneFor<P extends string> = P extends `${string}/add` ? AddDone : RosRecord;
 
 /** The row type for a path: the schema's item for a stream path, the
  *  schema's row for a print path, otherwise the lossless record. Resolves in

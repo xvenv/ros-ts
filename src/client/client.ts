@@ -11,10 +11,7 @@ import {
   type SchemaShape,
   type StreamCommandOptions,
 } from '../shared/index.js';
-import {
-  NativeConnection,
-  type NativeConnectionOptions,
-} from '../transport/index.js';
+import { NativeConnection, type NativeConnectionOptions } from '../transport/index.js';
 import { compileQuerySpec } from './query.js';
 
 export class RouterOS<S extends SchemaShape = EmptySchema> {
@@ -65,10 +62,7 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: CommandOptions<RowFor<S, P>>,
   ): Promise<CommandResult<RowFor<S, P>, DoneFor<P>>> {
-    const words = buildWords(
-      path,
-      options as CommandOptions<string> | undefined,
-    );
+    const words = buildWords(path, options as CommandOptions<string> | undefined);
     const signal = options?.signal;
     const timeoutMs = options?.timeoutMs;
     // Checked here, not only at connect time: an unvalidated value reaches
@@ -94,10 +88,7 @@ export class RouterOS<S extends SchemaShape = EmptySchema> {
     path: P,
     options?: StreamCommandOptions<RowFor<S, P>>,
   ): AsyncIterable<RowFor<S, P>> {
-    const words = buildWords(
-      path,
-      options as CommandOptions<string> | undefined,
-    );
+    const words = buildWords(path, options as CommandOptions<string> | undefined);
     const signal = options?.signal;
     const highWaterMark = options?.highWaterMark;
     // Checked at call time, not when the first record is requested: the queue
@@ -185,9 +176,7 @@ function validateConnectOptions(options: ConnectOptions): void {
   }
   if (
     options.port !== undefined &&
-    (!Number.isInteger(options.port) ||
-      options.port < 1 ||
-      options.port > 65535)
+    (!Number.isInteger(options.port) || options.port < 1 || options.port > 65535)
   ) {
     throw new RangeError('port must be an integer between 1 and 65535');
   }
@@ -233,10 +222,7 @@ function validatePositiveNumber(name: string, value: number | undefined): void {
   }
 }
 
-function validatePositiveInteger(
-  name: string,
-  value: number | undefined,
-): void {
+function validatePositiveInteger(name: string, value: number | undefined): void {
   if (value !== undefined && (!Number.isInteger(value) || value <= 0)) {
     throw new RangeError(`${name} must be an integer > 0`);
   }

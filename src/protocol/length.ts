@@ -13,11 +13,7 @@ export function encodeLength(length: number): Buffer {
     return Buffer.from([(length >> 8) | 0x80, length & 0xff]);
   }
   if (length < 0x200000) {
-    return Buffer.from([
-      (length >> 16) | 0xc0,
-      (length >> 8) & 0xff,
-      length & 0xff,
-    ]);
+    return Buffer.from([(length >> 16) | 0xc0, (length >> 8) & 0xff, length & 0xff]);
   }
   if (length < 0x10000000) {
     return Buffer.from([
@@ -67,8 +63,7 @@ export function decodeLength(buffer: Buffer, offset = 0): DecodedLength | null {
       return null;
     }
     return {
-      length:
-        (((first & 0x0f) << 24) | (second << 16) | (third << 8) | fourth) >>> 0,
+      length: (((first & 0x0f) << 24) | (second << 16) | (third << 8) | fourth) >>> 0,
       bytes: 4,
     };
   }

@@ -7,11 +7,7 @@ export function encodeWordIndep(value: string): Buffer {
   } else if (length < 0x4000) {
     prefix = Buffer.from([(length >> 8) | 0x80, length & 0xff]);
   } else if (length < 0x200000) {
-    prefix = Buffer.from([
-      (length >> 16) | 0xc0,
-      (length >> 8) & 0xff,
-      length & 0xff,
-    ]);
+    prefix = Buffer.from([(length >> 16) | 0xc0, (length >> 8) & 0xff, length & 0xff]);
   } else if (length < 0x10000000) {
     prefix = Buffer.from([
       (length >>> 24) | 0xe0,

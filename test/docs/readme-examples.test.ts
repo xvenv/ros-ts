@@ -62,10 +62,7 @@ function copiedLines(name: string): string[] {
   return source.split('\n').filter((line) => !isNonCopied(line));
 }
 
-function containsRun(
-  haystack: readonly string[],
-  needle: readonly string[],
-): boolean {
+function containsRun(haystack: readonly string[], needle: readonly string[]): boolean {
   if (needle.length === 0) return false;
   for (let start = 0; start + needle.length <= haystack.length; start += 1) {
     if (needle.every((line, offset) => haystack[start + offset] === line)) {
@@ -77,9 +74,7 @@ function containsRun(
 
 function matchingFile(block: readonly string[]): string | undefined {
   const core = block.filter((line) => !isNonCopied(line));
-  return checkedFileNames().find((name) =>
-    containsRun(copiedLines(name), core),
-  );
+  return checkedFileNames().find((name) => containsRun(copiedLines(name), core));
 }
 
 const readme = readFileSync(
@@ -126,9 +121,7 @@ test('a drifted README block is reported instead of matched', () => {
     const first = core[0] ?? '';
     const drifted = [`${first} // drifted`, ...core.slice(1)];
     assert.ok(
-      checkedFileNames().every(
-        (name) => !containsRun(copiedLines(name), drifted),
-      ),
+      checkedFileNames().every((name) => !containsRun(copiedLines(name), drifted)),
       `block ${index + 1} still matched after its first line was changed`,
     );
   }
